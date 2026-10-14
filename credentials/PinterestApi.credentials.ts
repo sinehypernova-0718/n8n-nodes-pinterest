@@ -6,15 +6,15 @@ import type {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export class GithubIssuesApi implements ICredentialType {
-	name = 'githubIssuesApi';
+export class PinterestApi implements ICredentialType {
+	name = 'pinterestApi';
 
-	displayName = 'GitHub Issues API';
+	displayName = 'Pinterest API';
 
-	icon: Icon = { light: 'file:../icons/github.svg', dark: 'file:../icons/github.dark.svg' };
+	icon: Icon = { light: 'file:../icons/pinterest.svg', dark: 'file:../icons/pinterest.dark.svg' };
 
 	documentationUrl =
-		'https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#deleting-a-personal-access-token';
+		'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/#use-a-token';
 
 	properties: INodeProperties[] = [
 		{
@@ -37,8 +37,8 @@ export class GithubIssuesApi implements ICredentialType {
 
 	test: ICredentialTestRequest = {
 		request: {
-			baseURL: 'https://api.github.com',
-			url: '/user',
+			baseURL: 'https://api.pinterest.com/v5',
+			url: '/user_account',
 			method: 'GET',
 		},
 	};

@@ -1,15 +1,15 @@
 import type { Icon, ICredentialType, INodeProperties } from 'n8n-workflow';
 
-export class GithubIssuesOAuth2Api implements ICredentialType {
-	name = 'githubIssuesOAuth2Api';
+export class PinterestOAuth2Api implements ICredentialType {
+	name = 'pinterestOAuth2Api';
 
 	extends = ['oAuth2Api'];
 
-	displayName = 'GitHub Issues OAuth2 API';
+	displayName = 'Pinterest OAuth2 API';
 
-	icon: Icon = { light: 'file:../icons/github.svg', dark: 'file:../icons/github.dark.svg' };
+	icon: Icon = { light: 'file:../icons/pinterest.svg', dark: 'file:../icons/pinterest.dark.svg' };
 
-	documentationUrl = 'https://docs.github.com/en/apps/oauth-apps';
+	documentationUrl = 'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/';
 
 	properties: INodeProperties[] = [
 		{
