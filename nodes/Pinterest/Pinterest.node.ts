@@ -11,6 +11,7 @@ import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workf
 import { boardFields } from './descriptions/BoardDescriptions';
 import { pinFields } from './descriptions/PinDescriptions';
 import { createPinRequest } from './requests/pin/create';
+import { getPinRequest } from './requests/pin/get';
 
 const PINTEREST_API_BASE_URL = 'https://api.pinterest.com/v5';
 
@@ -125,6 +126,9 @@ export class Pinterest implements INodeType {
 						switch (operation) {
 							case 'create':
 								requestOptions = await createPinRequest.call(this, i);
+								break;
+							case 'get':
+								requestOptions = await getPinRequest.call(this, i);
 								break;
 							default:
 								throw new NodeOperationError(
