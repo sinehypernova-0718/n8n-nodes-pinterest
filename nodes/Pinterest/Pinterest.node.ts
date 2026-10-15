@@ -12,6 +12,7 @@ import { boardFields } from './descriptions/BoardDescriptions';
 import { pinFields } from './descriptions/PinDescriptions';
 import { createPinRequest } from './requests/pin/create';
 import { getPinRequest } from './requests/pin/get';
+import { listPinsRequest } from './requests/pin/list';
 
 const PINTEREST_API_BASE_URL = 'https://api.pinterest.com/v5';
 
@@ -23,6 +24,71 @@ function resolveCredentialsType(authentication: string): string | null {
 		return 'pinterestOAuth2Api';
 	}
 	return null;
+}
+
+async function collectPinListPages(
+	this: IExecuteFunctions,
+	credentialsType: string,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
+	const limit = returnAll
+		? Number.POSITIVE_INFINITY
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
+
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				credentialsType,
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		if (collected.length >= limit) {
+			break;
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await listPinsRequest.call(this, itemIndex, nextBookmark);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return returnAll ? collected : collected.slice(0, limit);
 }
 
 export class Pinterest implements INodeType {
@@ -130,6 +196,9 @@ export class Pinterest implements INodeType {
 							case 'get':
 								requestOptions = await getPinRequest.call(this, i);
 								break;
+							case 'list':
+								requestOptions = await listPinsRequest.call(this, i);
+								break;
 							default:
 								throw new NodeOperationError(
 									this.getNode(),
@@ -150,25 +219,29 @@ export class Pinterest implements INodeType {
 						});
 				}
 
-				const options: IHttpRequestOptions = {
-					baseURL: PINTEREST_API_BASE_URL,
-					json: true,
-					...requestOptions,
-				};
+				let responseData: IDataObject | IDataObject[];
+				if (resource === 'pin' && operation === 'list') {
+					responseData = await collectPinListPages.call(this, credentialsType, requestOptions, i);
+				} else {
+					const options: IHttpRequestOptions = {
+						baseURL: PINTEREST_API_BASE_URL,
+						json: true,
+						...requestOptions,
+					};
 
-				let responseData;
-				try {
-					responseData = await this.helpers.httpRequestWithAuthentication.call(
-						this,
-						credentialsType,
-						options,
-					);
-				} catch (error) {
-					throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });
+					try {
+						responseData = await this.helpers.httpRequestWithAuthentication.call(
+							this,
+							credentialsType,
+							options,
+						);
+					} catch (error) {
+						throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });
+					}
 				}
 
 				const executionData = this.helpers.constructExecutionMetaData(
-					this.helpers.returnJsonArray((responseData ?? {}) as IDataObject),
+					this.helpers.returnJsonArray(responseData ?? {}),
 					{ itemData: { item: i } },
 				);
 				returnData.push(...executionData);
