@@ -10,6 +10,7 @@ import type {
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { boardFields } from './descriptions/BoardDescriptions';
 import { pinFields } from './descriptions/PinDescriptions';
+import { getBoardRequest } from './requests/board/get';
 import { createPinRequest } from './requests/pin/create';
 import { deletePinRequest } from './requests/pin/delete';
 import { getPinRequest } from './requests/pin/get';
@@ -220,11 +221,18 @@ export class Pinterest implements INodeType {
 						}
 						break;
 					case 'board':
-						throw new NodeOperationError(
-							this.getNode(),
-							`The Board operation "${operation}" is not implemented yet`,
-							{ itemIndex: i },
-						);
+						switch (operation) {
+							case 'get':
+								requestOptions = await getBoardRequest.call(this, i);
+								break;
+							default:
+								throw new NodeOperationError(
+									this.getNode(),
+									`The Board operation "${operation}" is not implemented yet`,
+									{ itemIndex: i },
+								);
+						}
+						break;
 					default:
 						throw new NodeOperationError(this.getNode(), `Unsupported resource: ${resource}`, {
 							itemIndex: i,
