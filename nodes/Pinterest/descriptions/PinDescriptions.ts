@@ -179,7 +179,6 @@ export const pinFields: INodeProperties[] = [
 		name: 'cover_image_url',
 		type: 'string',
 		default: '',
-		required: true,
 		displayOptions: {
 			show: {
 				resource: ['pin'],
@@ -187,6 +186,7 @@ export const pinFields: INodeProperties[] = [
 				source_type: ['video_id'],
 			},
 		},
+		description: 'Optional cover image URL for the video Pin',
 	},
 	{
 		displayName: 'Is Standard',
@@ -275,15 +275,19 @@ export const pinFields: INodeProperties[] = [
 						name: 'AI Modified',
 						value: 'AI_MODIFIED',
 					},
+					{
+						name: 'Synthetic Performer',
+						value: 'SYNTHETIC_PERFORMER',
+					},
 				],
 				default: [],
 			},
 			{
-				displayName: 'Is Removable',
-				name: 'is_removable',
-				type: 'boolean',
-				default: false,
-				description: 'Whether the Pin is removable, as defined by Pinterest',
+				displayName: 'Ad Account ID',
+				name: 'ad_account_id',
+				type: 'string',
+				default: '',
+				description: 'Numeric ad account ID (up to 18 digits)',
 			},
 		],
 	},
@@ -291,20 +295,6 @@ export const pinFields: INodeProperties[] = [
 	// ----------------------------------
 	//           pin:list
 	// ----------------------------------
-	{
-		displayName: 'Board ID',
-		name: 'boardId',
-		type: 'string',
-		default: '',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['pin'],
-				operation: ['list'],
-			},
-		},
-		description: 'ID of the board whose Pins you want to retrieve',
-	},
 	{
 		displayName: 'Return All',
 		name: 'returnAll',
@@ -392,7 +382,7 @@ export const pinFields: INodeProperties[] = [
 				type: 'multiOptions',
 				options: [
 					{ name: 'Idea Pin', value: 'IDEA' },
-					{ name: 'Image', value: 'IMAGE' },
+					{ name: 'Image (Regular)', value: 'REGULAR' },
 					{ name: 'Video', value: 'VIDEO' },
 					{ name: 'Collection', value: 'COLLECTION' },
 				],
@@ -456,10 +446,11 @@ export const pinFields: INodeProperties[] = [
 	{
 		displayName: 'Start Date',
 		name: 'startDate',
-		type: 'dateTime',
+		type: 'string',
 		default: '',
 		required: true,
-		description: 'Metric report start date (UTC). Must be within the last 90 days. Use YYYY-MM-DD.',
+		placeholder: 'YYYY-MM-DD',
+		description: 'Metric report start date (UTC). Must be within the last 90 days.',
 		displayOptions: {
 			show: {
 				resource: ['pin'],
@@ -470,10 +461,11 @@ export const pinFields: INodeProperties[] = [
 	{
 		displayName: 'End Date',
 		name: 'endDate',
-		type: 'dateTime',
+		type: 'string',
 		default: '',
 		required: true,
-		description: 'Metric report end date (UTC). Must be no more than 90 days after the start date. Use YYYY-MM-DD.',
+		placeholder: 'YYYY-MM-DD',
+		description: 'Metric report end date (UTC). Must be no more than 90 days after the start date.',
 		displayOptions: {
 			show: {
 				resource: ['pin'],
@@ -505,11 +497,21 @@ export const pinFields: INodeProperties[] = [
 		name: 'metricTypes',
 		type: 'multiOptions',
 		options: [
-			{ name: 'Closeups', value: 'CLOSEUP' },
 			{ name: 'Impressions', value: 'IMPRESSION' },
 			{ name: 'Outbound Clicks', value: 'OUTBOUND_CLICK' },
 			{ name: 'Pin Clicks', value: 'PIN_CLICK' },
+			{ name: 'Profile Visits', value: 'PROFILE_VISIT' },
+			{ name: 'Save Rate', value: 'SAVE_RATE' },
 			{ name: 'Saves', value: 'SAVE' },
+			{ name: 'Total Comments', value: 'TOTAL_COMMENTS' },
+			{ name: 'Total Reactions', value: 'TOTAL_REACTIONS' },
+			{ name: 'User Follows', value: 'USER_FOLLOW' },
+			{ name: 'Video 10s Views', value: 'VIDEO_10S_VIEW' },
+			{ name: 'Video 95% Quartile Views', value: 'QUARTILE_95_PERCENT_VIEW' },
+			{ name: 'Video Average Watch Time', value: 'VIDEO_AVG_WATCH_TIME' },
+			{ name: 'Video Starts', value: 'VIDEO_START' },
+			{ name: 'Video Views (MRC)', value: 'VIDEO_MRC_VIEW' },
+			{ name: 'Video Watch Time (50%)', value: 'VIDEO_V50_WATCH_TIME' },
 		],
 		default: [],
 		required: true,
@@ -668,6 +670,10 @@ export const pinFields: INodeProperties[] = [
 						name: 'AI Modified',
 						value: 'AI_MODIFIED',
 					},
+					{
+						name: 'Synthetic Performer',
+						value: 'SYNTHETIC_PERFORMER',
+					},
 				],
 				default: [],
 				description: 'AI disclosure declarations for the Pin',
@@ -796,13 +802,20 @@ export const pinFields: INodeProperties[] = [
 		displayName: 'Metric Types',
 		name: 'metricTypes',
 		type: 'multiOptions',
-		// eslint-disable-next-line n8n-nodes-base/node-param-multi-options-type-unsorted-items
 		options: [
 			{ name: 'Impressions', value: 'IMPRESSION' },
-			{ name: 'Saves', value: 'SAVE' },
-			{ name: 'Pin Clicks', value: 'PIN_CLICK' },
 			{ name: 'Outbound Clicks', value: 'OUTBOUND_CLICK' },
-			{ name: 'Closeups', value: 'CLOSEUP' },
+			{ name: 'Pin Clicks', value: 'PIN_CLICK' },
+			{ name: 'Profile Visits', value: 'PROFILE_VISIT' },
+			{ name: 'Save Rate', value: 'SAVE_RATE' },
+			{ name: 'Saves', value: 'SAVE' },
+			{ name: 'Total Comments', value: 'TOTAL_COMMENTS' },
+			{ name: 'Total Reactions', value: 'TOTAL_REACTIONS' },
+			{ name: 'User Follows', value: 'USER_FOLLOW' },
+			{ name: 'Video 10s Views', value: 'VIDEO_10S_VIEW' },
+			{ name: 'Video 95% Quartile Views', value: 'QUARTILE_95_PERCENT_VIEW' },
+			{ name: 'Video Average Watch Time', value: 'VIDEO_AVG_WATCH_TIME' },
+			{ name: 'Video Starts', value: 'VIDEO_START' },
 			{ name: 'Video Views (MRC)', value: 'VIDEO_MRC_VIEW' },
 			{ name: 'Video Watch Time (50%)', value: 'VIDEO_V50_WATCH_TIME' },
 		],

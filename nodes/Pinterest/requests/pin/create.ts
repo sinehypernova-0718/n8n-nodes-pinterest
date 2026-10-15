@@ -62,11 +62,10 @@ export async function createPinRequest(
 			if (!mediaId) {
 				throw new NodeOperationError(this.getNode(), 'Media ID is required', { itemIndex });
 			}
-			if (!coverImageUrl) {
-				throw new NodeOperationError(this.getNode(), 'Cover Image URL is required', { itemIndex });
-			}
 			mediaSource.media_id = mediaId;
-			mediaSource.cover_image_url = coverImageUrl;
+			if (coverImageUrl) {
+				mediaSource.cover_image_url = coverImageUrl;
+			}
 			mediaSource.is_standard = isStandard;
 			break;
 		}
@@ -95,13 +94,16 @@ export async function createPinRequest(
 		body.ai_disclosures = { values: aiDisclosures };
 	}
 
-	if (additionalFields.is_removable !== undefined) {
-		body.is_removable = additionalFields.is_removable;
-	}
-
-	return {
+	const requestOptions: IHttpRequestOptions = {
 		method: 'POST',
 		url: '/pins',
 		body,
 	};
+
+	const adAccountId = additionalFields.ad_account_id;
+	if (typeof adAccountId === 'string' && adAccountId.trim() !== '') {
+		requestOptions.qs = { ad_account_id: adAccountId };
+	}
+
+	return requestOptions;
 }
