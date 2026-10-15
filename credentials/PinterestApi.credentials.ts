@@ -11,7 +11,7 @@ export class PinterestApi implements ICredentialType {
 
 	displayName = 'Pinterest API';
 
-	icon: Icon = { light: 'file:../icons/pinterest.svg', dark: 'file:../icons/pinterest.dark.svg' };
+	icon: Icon = { light: 'file:../nodes/Pinterest/pinterest.svg', dark: 'file:../nodes/Pinterest/pinterest.dark.svg' };
 
 	documentationUrl =
 		'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/#use-a-token';
@@ -30,7 +30,7 @@ export class PinterestApi implements ICredentialType {
 		type: 'generic',
 		properties: {
 			headers: {
-				Authorization: '=token {{$credentials?.accessToken}}',
+				Authorization: '=Bearer {{$credentials?.accessToken}}',
 			},
 		},
 	};

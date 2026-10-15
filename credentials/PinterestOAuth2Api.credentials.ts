@@ -7,7 +7,7 @@ export class PinterestOAuth2Api implements ICredentialType {
 
 	displayName = 'Pinterest OAuth2 API';
 
-	icon: Icon = { light: 'file:../icons/pinterest.svg', dark: 'file:../icons/pinterest.dark.svg' };
+	icon: Icon = { light: 'file:../nodes/Pinterest/pinterest.svg', dark: 'file:../nodes/Pinterest/pinterest.dark.svg' };
 
 	documentationUrl = 'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/';
 
@@ -22,21 +22,21 @@ export class PinterestOAuth2Api implements ICredentialType {
 			displayName: 'Authorization URL',
 			name: 'authUrl',
 			type: 'hidden',
-			default: 'https://github.com/login/oauth/authorize',
+			default: 'https://www.pinterest.com/oauth/',
 			required: true,
 		},
 		{
 			displayName: 'Access Token URL',
 			name: 'accessTokenUrl',
 			type: 'hidden',
-			default: 'https://github.com/login/oauth/access_token',
+			default: 'https://api.pinterest.com/v5/oauth/token',
 			required: true,
 		},
 		{
 			displayName: 'Scope',
 			name: 'scope',
 			type: 'hidden',
-			default: 'repo',
+			default: 'boards:read,boards:write,pins:read,pins:write',
 		},
 		{
 			displayName: 'Auth URI Query Parameters',

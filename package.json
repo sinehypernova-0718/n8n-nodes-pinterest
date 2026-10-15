@@ -1,7 +1,7 @@
-﻿{
+{
 	"name": "n8n-nodes-pinterest",
 	"version": "0.1.0",
-	"description": "",
+	"description": "Pinterest integration for n8n. Automate Pins, Boards, and Pinterest API workflows with a community-built node.",
 	"license": "MIT",
 	"homepage": "",
 	"keywords": [
@@ -49,4 +49,3 @@
 		"n8n-workflow": "*"
 	}
 }
-
