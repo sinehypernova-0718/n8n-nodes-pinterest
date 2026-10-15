@@ -11,6 +11,7 @@ import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workf
 import { boardFields } from './descriptions/BoardDescriptions';
 import { pinFields } from './descriptions/PinDescriptions';
 import { getBoardRequest } from './requests/board/get';
+import { listBoardsRequest } from './requests/board/list';
 import { createPinRequest } from './requests/pin/create';
 import { deletePinRequest } from './requests/pin/delete';
 import { getPinRequest } from './requests/pin/get';
@@ -93,6 +94,62 @@ async function collectPinListPages(
 	}
 
 	return returnAll ? collected : collected.slice(0, limit);
+}
+
+async function collectBoardListPages(
+	this: IExecuteFunctions,
+	credentialsType: string,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				credentialsType,
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await listBoardsRequest.call(this, itemIndex, nextBookmark);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return collected;
 }
 
 export class Pinterest implements INodeType {
@@ -225,6 +282,9 @@ export class Pinterest implements INodeType {
 							case 'get':
 								requestOptions = await getBoardRequest.call(this, i);
 								break;
+							case 'list':
+								requestOptions = await listBoardsRequest.call(this, i);
+								break;
 							default:
 								throw new NodeOperationError(
 									this.getNode(),
@@ -242,6 +302,8 @@ export class Pinterest implements INodeType {
 				let responseData: IDataObject | IDataObject[];
 				if (resource === 'pin' && operation === 'list') {
 					responseData = await collectPinListPages.call(this, credentialsType, requestOptions, i);
+				} else if (resource === 'board' && operation === 'list') {
+					responseData = await collectBoardListPages.call(this, credentialsType, requestOptions, i);
 				} else {
 					const options: IHttpRequestOptions = {
 						baseURL: PINTEREST_API_BASE_URL,
