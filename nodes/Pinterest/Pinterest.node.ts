@@ -14,6 +14,7 @@ import { createPinRequest } from './requests/pin/create';
 import { getPinRequest } from './requests/pin/get';
 import { getMultiplePinsRequest } from './requests/pin/getMultiple';
 import { listPinsRequest } from './requests/pin/list';
+import { updatePinRequest } from './requests/pin/update';
 
 const PINTEREST_API_BASE_URL = 'https://api.pinterest.com/v5';
 
@@ -202,6 +203,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'getMultiple':
 								requestOptions = await getMultiplePinsRequest.call(this, i);
+								break;
+							case 'update':
+								requestOptions = await updatePinRequest.call(this, i);
 								break;
 							default:
 								throw new NodeOperationError(
