@@ -10,6 +10,7 @@ import type {
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { boardFields } from './descriptions/BoardDescriptions';
 import { pinFields } from './descriptions/PinDescriptions';
+import { deleteBoardRequest } from './requests/board/delete';
 import { getBoardRequest } from './requests/board/get';
 import { listBoardsRequest } from './requests/board/list';
 import { createPinRequest } from './requests/pin/create';
@@ -284,6 +285,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'list':
 								requestOptions = await listBoardsRequest.call(this, i);
+								break;
+							case 'delete':
+								requestOptions = await deleteBoardRequest.call(this, i);
 								break;
 							default:
 								throw new NodeOperationError(
