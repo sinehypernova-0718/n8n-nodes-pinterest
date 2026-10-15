@@ -13,6 +13,7 @@ import { pinFields } from './descriptions/PinDescriptions';
 import { deleteBoardRequest } from './requests/board/delete';
 import { getBoardRequest } from './requests/board/get';
 import { listBoardsRequest } from './requests/board/list';
+import { listBoardPinsRequest } from './requests/board/listPins';
 import { updateBoardRequest } from './requests/board/update';
 import { createPinRequest } from './requests/pin/create';
 import { deletePinRequest } from './requests/pin/delete';
@@ -144,6 +145,62 @@ async function collectBoardListPages(
 		seenBookmarks.add(nextBookmark);
 
 		const nextPageRequest = await listBoardsRequest.call(this, itemIndex, nextBookmark);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return collected;
+}
+
+async function collectBoardPinsListPages(
+	this: IExecuteFunctions,
+	credentialsType: string,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				credentialsType,
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await listBoardPinsRequest.call(this, itemIndex, nextBookmark);
 		requestOptions = {
 			baseURL: PINTEREST_API_BASE_URL,
 			json: true,
@@ -287,6 +344,9 @@ export class Pinterest implements INodeType {
 							case 'list':
 								requestOptions = await listBoardsRequest.call(this, i);
 								break;
+							case 'listPins':
+								requestOptions = await listBoardPinsRequest.call(this, i);
+								break;
 							case 'delete':
 								requestOptions = await deleteBoardRequest.call(this, i);
 								break;
@@ -312,6 +372,13 @@ export class Pinterest implements INodeType {
 					responseData = await collectPinListPages.call(this, credentialsType, requestOptions, i);
 				} else if (resource === 'board' && operation === 'list') {
 					responseData = await collectBoardListPages.call(this, credentialsType, requestOptions, i);
+				} else if (resource === 'board' && operation === 'listPins') {
+					responseData = await collectBoardPinsListPages.call(
+						this,
+						credentialsType,
+						requestOptions,
+						i,
+					);
 				} else {
 					const options: IHttpRequestOptions = {
 						baseURL: PINTEREST_API_BASE_URL,
