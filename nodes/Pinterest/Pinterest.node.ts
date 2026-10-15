@@ -12,6 +12,7 @@ import { boardFields } from './descriptions/BoardDescriptions';
 import { pinFields } from './descriptions/PinDescriptions';
 import { createPinRequest } from './requests/pin/create';
 import { getPinRequest } from './requests/pin/get';
+import { getMultiplePinsRequest } from './requests/pin/getMultiple';
 import { listPinsRequest } from './requests/pin/list';
 
 const PINTEREST_API_BASE_URL = 'https://api.pinterest.com/v5';
@@ -198,6 +199,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'list':
 								requestOptions = await listPinsRequest.call(this, i);
+								break;
+							case 'getMultiple':
+								requestOptions = await getMultiplePinsRequest.call(this, i);
 								break;
 							default:
 								throw new NodeOperationError(
