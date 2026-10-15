@@ -13,6 +13,7 @@ import { pinFields } from './descriptions/PinDescriptions';
 import { deleteBoardRequest } from './requests/board/delete';
 import { getBoardRequest } from './requests/board/get';
 import { listBoardsRequest } from './requests/board/list';
+import { updateBoardRequest } from './requests/board/update';
 import { createPinRequest } from './requests/pin/create';
 import { deletePinRequest } from './requests/pin/delete';
 import { getPinRequest } from './requests/pin/get';
@@ -288,6 +289,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'delete':
 								requestOptions = await deleteBoardRequest.call(this, i);
+								break;
+							case 'update':
+								requestOptions = await updateBoardRequest.call(this, i);
 								break;
 							default:
 								throw new NodeOperationError(

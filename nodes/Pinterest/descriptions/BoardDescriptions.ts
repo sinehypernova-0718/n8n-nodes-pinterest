@@ -293,7 +293,6 @@ export const boardFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{ name: 'Public', value: 'PUBLIC' },
-					{ name: 'Protected', value: 'PROTECTED' },
 					{ name: 'Secret', value: 'SECRET' },
 				],
 				default: 'PUBLIC',
