@@ -20,6 +20,7 @@ import { deletePinRequest } from './requests/pin/delete';
 import { getPinRequest } from './requests/pin/get';
 import { getMultiplePinsRequest } from './requests/pin/getMultiple';
 import { listPinsRequest } from './requests/pin/list';
+import { savePinRequest } from './requests/pin/save';
 import { updatePinRequest } from './requests/pin/update';
 
 const PINTEREST_API_BASE_URL = 'https://api.pinterest.com/v5';
@@ -327,6 +328,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'delete':
 								requestOptions = await deletePinRequest.call(this, i);
+								break;
+							case 'save':
+								requestOptions = await savePinRequest.call(this, i);
 								break;
 							default:
 								throw new NodeOperationError(
