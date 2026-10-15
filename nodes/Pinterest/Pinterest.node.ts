@@ -11,6 +11,7 @@ import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workf
 import { boardFields } from './descriptions/BoardDescriptions';
 import { pinFields } from './descriptions/PinDescriptions';
 import { createPinRequest } from './requests/pin/create';
+import { deletePinRequest } from './requests/pin/delete';
 import { getPinRequest } from './requests/pin/get';
 import { getMultiplePinsRequest } from './requests/pin/getMultiple';
 import { listPinsRequest } from './requests/pin/list';
@@ -206,6 +207,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'update':
 								requestOptions = await updatePinRequest.call(this, i);
+								break;
+							case 'delete':
+								requestOptions = await deletePinRequest.call(this, i);
 								break;
 							default:
 								throw new NodeOperationError(
