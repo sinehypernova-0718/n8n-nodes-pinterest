@@ -116,7 +116,7 @@ When reporting an issue, include the affected resource and operation, relevant v
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE.md).
 
 ---
 
