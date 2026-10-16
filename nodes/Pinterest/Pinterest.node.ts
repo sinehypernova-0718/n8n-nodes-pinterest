@@ -26,19 +26,8 @@ import {
 
 const PINTEREST_API_BASE_URL = 'https://api.pinterest.com/v5';
 
-function resolveCredentialsType(authentication: string): string | null {
-	if (authentication === 'accessToken') {
-		return 'pinterestApi';
-	}
-	if (authentication === 'oAuth2') {
-		return 'pinterestOAuth2Api';
-	}
-	return null;
-}
-
 async function collectPinListPages(
 	this: IExecuteFunctions,
-	credentialsType: string,
 	firstPageRequest: IHttpRequestOptions,
 	itemIndex: number,
 ): Promise<IDataObject[]> {
@@ -65,7 +54,7 @@ async function collectPinListPages(
 		try {
 			response = (await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				credentialsType,
+				'pinterestOAuth2Api',
 				requestOptions,
 			)) as IDataObject;
 		} catch (error) {
@@ -103,7 +92,6 @@ async function collectPinListPages(
 
 async function collectBoardListPages(
 	this: IExecuteFunctions,
-	credentialsType: string,
 	firstPageRequest: IHttpRequestOptions,
 	itemIndex: number,
 ): Promise<IDataObject[]> {
@@ -125,7 +113,7 @@ async function collectBoardListPages(
 		try {
 			response = (await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				credentialsType,
+				'pinterestOAuth2Api',
 				requestOptions,
 			)) as IDataObject;
 		} catch (error) {
@@ -159,7 +147,6 @@ async function collectBoardListPages(
 
 async function collectBoardPinsListPages(
 	this: IExecuteFunctions,
-	credentialsType: string,
 	firstPageRequest: IHttpRequestOptions,
 	itemIndex: number,
 ): Promise<IDataObject[]> {
@@ -181,7 +168,7 @@ async function collectBoardPinsListPages(
 		try {
 			response = (await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				credentialsType,
+				'pinterestOAuth2Api',
 				requestOptions,
 			)) as IDataObject;
 		} catch (error) {
@@ -228,22 +215,8 @@ export class Pinterest implements INodeType {
 		},
 		credentials: [
 			{
-				name: 'pinterestApi',
-				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['accessToken'],
-					},
-				},
-			},
-			{
 				name: 'pinterestOAuth2Api',
 				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['oAuth2'],
-					},
-				},
 			},
 		],
 		inputs: [NodeConnectionTypes.Main],
@@ -251,22 +224,6 @@ export class Pinterest implements INodeType {
 		usableAsTool: true,
 
 		properties: [
-			{
-				displayName: 'Authentication',
-				name: 'authentication',
-				type: 'options',
-				options: [
-					{
-						name: 'Access Token',
-						value: 'accessToken',
-					},
-					{
-						name: 'OAuth2',
-						value: 'oAuth2',
-					},
-				],
-				default: 'accessToken',
-			},
 			{
 				displayName: 'Resource',
 				name: 'resource',
@@ -297,16 +254,6 @@ export class Pinterest implements INodeType {
 			try {
 				const resource = this.getNodeParameter('resource', i) as string;
 				const operation = this.getNodeParameter('operation', i) as string;
-				const authentication = this.getNodeParameter('authentication', i) as string;
-
-				const credentialsType = resolveCredentialsType(authentication);
-				if (credentialsType === null) {
-					throw new NodeOperationError(
-						this.getNode(),
-						`Unsupported authentication method: ${authentication}`,
-						{ itemIndex: i },
-					);
-				}
 
 				let requestOptions: IHttpRequestOptions;
 				switch (resource) {
@@ -374,16 +321,11 @@ export class Pinterest implements INodeType {
 
 				let responseData: IDataObject | IDataObject[];
 				if (resource === 'pin' && operation === 'list') {
-					responseData = await collectPinListPages.call(this, credentialsType, requestOptions, i);
+					responseData = await collectPinListPages.call(this, requestOptions, i);
 				} else if (resource === 'board' && operation === 'list') {
-					responseData = await collectBoardListPages.call(this, credentialsType, requestOptions, i);
+					responseData = await collectBoardListPages.call(this, requestOptions, i);
 				} else if (resource === 'board' && operation === 'listPins') {
-					responseData = await collectBoardPinsListPages.call(
-						this,
-						credentialsType,
-						requestOptions,
-						i,
-					);
+					responseData = await collectBoardPinsListPages.call(this, requestOptions, i);
 				} else {
 					const options: IHttpRequestOptions = {
 						baseURL: PINTEREST_API_BASE_URL,
@@ -394,7 +336,7 @@ export class Pinterest implements INodeType {
 					try {
 						responseData = await this.helpers.httpRequestWithAuthentication.call(
 							this,
-							credentialsType,
+							'pinterestOAuth2Api',
 							options,
 						);
 					} catch (error) {
