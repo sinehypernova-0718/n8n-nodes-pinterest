@@ -5,10 +5,10 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
-	JsonObject,
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { boardFields, pinFields } from './descriptions';
+import { mapPinterestApiError } from './errors';
 import {
 	createPinRequest,
 	deleteBoardRequest,
@@ -58,7 +58,7 @@ async function collectPinListPages(
 				requestOptions,
 			)) as IDataObject;
 		} catch (error) {
-			throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex });
+			throw mapPinterestApiError(error, { itemIndex });
 		}
 
 		if (Array.isArray(response?.items)) {
@@ -117,7 +117,7 @@ async function collectBoardListPages(
 				requestOptions,
 			)) as IDataObject;
 		} catch (error) {
-			throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex });
+			throw mapPinterestApiError(error, { itemIndex });
 		}
 
 		if (Array.isArray(response?.items)) {
@@ -172,7 +172,7 @@ async function collectBoardPinsListPages(
 				requestOptions,
 			)) as IDataObject;
 		} catch (error) {
-			throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex });
+			throw mapPinterestApiError(error, { itemIndex });
 		}
 
 		if (Array.isArray(response?.items)) {
@@ -340,7 +340,7 @@ export class Pinterest implements INodeType {
 							options,
 						);
 					} catch (error) {
-						throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });
+						throw mapPinterestApiError(error, { itemIndex: i });
 					}
 				}
 
@@ -358,8 +358,9 @@ export class Pinterest implements INodeType {
 					returnData.push(...executionData);
 					continue;
 				}
-				if (error instanceof NodeApiError) {
-					// Already wrapped at the HTTP boundary; rethrow it as-is to preserve API details.
+				if (error instanceof NodeApiError || error instanceof NodeOperationError) {
+					// Already mapped at the request boundary; rethrow as-is to preserve the
+					// API error details or the local operation error.
 					// eslint-disable-next-line @n8n/community-nodes/require-node-api-error
 					throw error;
 				}
