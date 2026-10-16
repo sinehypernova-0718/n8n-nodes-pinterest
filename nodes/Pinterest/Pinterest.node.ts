@@ -8,20 +8,21 @@ import type {
 	JsonObject,
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
-import { boardFields } from './descriptions/BoardDescriptions';
-import { pinFields } from './descriptions/PinDescriptions';
-import { deleteBoardRequest } from './requests/board/delete';
-import { getBoardRequest } from './requests/board/get';
-import { listBoardsRequest } from './requests/board/list';
-import { listBoardPinsRequest } from './requests/board/listPins';
-import { updateBoardRequest } from './requests/board/update';
-import { createPinRequest } from './requests/pin/create';
-import { deletePinRequest } from './requests/pin/delete';
-import { getPinRequest } from './requests/pin/get';
-import { getMultiplePinsRequest } from './requests/pin/getMultiple';
-import { listPinsRequest } from './requests/pin/list';
-import { savePinRequest } from './requests/pin/save';
-import { updatePinRequest } from './requests/pin/update';
+import { boardFields, pinFields } from './descriptions';
+import {
+	createPinRequest,
+	deleteBoardRequest,
+	deletePinRequest,
+	getBoardRequest,
+	getMultiplePinsRequest,
+	getPinRequest,
+	listBoardPinsRequest,
+	listBoardsRequest,
+	listPinsRequest,
+	savePinRequest,
+	updateBoardRequest,
+	updatePinRequest,
+} from './requests';
 
 const PINTEREST_API_BASE_URL = 'https://api.pinterest.com/v5';
 
