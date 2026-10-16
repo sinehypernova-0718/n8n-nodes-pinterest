@@ -12,28 +12,81 @@
   <i>First release coming soon.</i>
 </p>
 
-This project brings Pinterest API operations into n8n workflows, making it easier to work with Pinterest without manually building API requests.
+[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
+
+**n8n-nodes-pinterest** brings Pinterest API operations into n8n workflows, letting you work with Pins and Boards through the workflow editor instead of manually constructing API requests.
 
 ## Features
 
-- **Pins and Boards** — work with Pinterest resources through the n8n node.
-- **OAuth2 authentication** — connect your Pinterest account using the configured credentials.
-- **Native n8n interface** — configure supported resources and operations directly in the workflow editor.
-- **Modular TypeScript codebase** — resource descriptions and API request builders are maintained separately.
+- **Pins and Boards** — perform supported operations on Pinterest resources directly from n8n workflows.
+- **OAuth2 authentication** — configure Pinterest API access through the node's credentials.
+- **Native n8n interface** — select resources and operations and configure their parameters in the workflow editor.
+- **Modular TypeScript architecture** — keep node descriptions, request builders, and execution logic separated by responsibility.
+
+## Repository Structure
+
+```text
+n8n-nodes-pinterest/
+├── credentials/
+│   └── PinterestOAuth2Api.credentials.ts
+├── nodes/
+│   └── Pinterest/
+│       ├── descriptions/
+│       │   ├── BoardDescriptions.ts
+│       │   ├── PinDescriptions.ts
+│       │   └── index.ts
+│       ├── requests/
+│       │   ├── board/
+│       │   │   ├── <operation>.ts
+│       │   │   └── index.ts
+│       │   ├── pin/
+│       │   │   ├── <operation>.ts
+│       │   │   └── index.ts
+│       │   └── index.ts
+│       └── Pinterest.node.ts
+├── package.json
+├── README.md
+└── LICENSE
+```
+
+### Architecture
+
+- **`credentials/`** — defines the Pinterest OAuth2 credentials used to authenticate requests.
+- **`descriptions/`** — contains the resource and operation definitions displayed in the n8n editor. Its `index.ts` explicitly exports the descriptions used by the main node.
+- **`requests/board/`** — contains request builders for Pinterest Board operations.
+- **`requests/pin/`** — contains request builders for Pinterest Pin operations.
+- **`requests/<resource>/<operation>.ts`** — each operation has its own TypeScript file. For example, `create.ts`, `get.ts`, `list.ts`, and `update.ts`. The filename describes the operation, while the module builds the corresponding API request.
+- **Resource `index.ts` files** — explicitly export the request builders belonging to each resource.
+- **`requests/index.ts`** — re-exports the resource-level barrels, giving the main node a single import entry point.
+- **`Pinterest.node.ts`** — defines the n8n node and coordinates operation execution, authenticated HTTP requests, pagination, and error handling.
+
+The barrel files keep imports concise without merging resource-specific modules or introducing another execution layer.
 
 ## Installation
 
-The first version will be available on npm soon. Installation instructions will be added when the package is published.
+The first release is coming soon. Installation instructions will be added once the package is published on npm.
 
 ## Authentication
 
 You'll need a Pinterest developer application with the appropriate API access and permissions.
 
-You can create and manage your application through the [Pinterest Developers platform](https://developers.pinterest.com/). Refer to the [Pinterest API documentation](https://developers.pinterest.com/docs/) for information about authentication, permissions, and available endpoints.
+- [Pinterest Developers](https://developers.pinterest.com/) — create and manage your developer application.
+- [Pinterest API Documentation](https://developers.pinterest.com/docs/) — consult the API documentation for authentication, permissions, and supported endpoints.
+
+Configure your Pinterest OAuth2 credentials in n8n before using the node. Access to particular operations depends on the permissions granted to your Pinterest application.
 
 ## Development
 
-Clone the repository and install its dependencies:
+### Prerequisites
+
+- Node.js
+- pnpm
+
+Use the Node.js version and package-manager requirements specified by the repository configuration.
+
+### Setup
+
+Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/sinehypernova-0718/n8n-nodes-pinterest.git
@@ -41,25 +94,25 @@ cd n8n-nodes-pinterest
 pnpm install
 ```
 
-Build the package:
+### Build
 
 ```bash
 pnpm build
 ```
 
-Run the linter:
+### Lint
 
 ```bash
 pnpm lint
 ```
 
-Check `package.json` for the available scripts and development requirements.
+For additional scripts and development requirements, refer to `package.json`.
 
 ## Contributing
 
-Found a bug or have an idea for an improvement? Contributions, suggestions, and issue reports are welcome.
+Bug reports, suggestions, and contributions are welcome.
 
-When reporting an issue, include the affected operation, relevant version information, and any error messages. Remove access tokens, client secrets, and other sensitive information before sharing logs.
+When reporting an issue, include the affected resource and operation, relevant version information, and any error messages. **Never include access tokens, client secrets, or other sensitive credentials** in issues or logs.
 
 ## License
 
