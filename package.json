@@ -1,11 +1,19 @@
 {
-	"name": "n8n-nodes-pinterest",
+	"name": "@sinehypernova-0718/n8n-nodes-pinterest",
 	"version": "0.1.0",
+	"packageManager": "pnpm@12.4.2",
 	"description": "Pinterest integration for n8n. Automate Pins, Boards, and Pinterest API workflows with a community-built node.",
 	"license": "MIT",
-	"homepage": "",
+	"homepage": "https://github.com/sinehypernova-0718/n8n-nodes-pinterest#readme",
 	"keywords": [
-		"n8n-community-node-package"
+		"n8n-community-node-package",
+		"n8n-nodes-pinterest",
+		"n8n-nodes",
+		"pinterest",
+		"automation",
+		"workflow",
+		"marketing",
+		"social media"
 	],
 	"author": {
 		"name": "Srinjoy",
@@ -21,6 +29,7 @@
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
+		"test": "pnpm build && node --test test/",
 		"release": "n8n-node release",
 		"prepublishOnly": "n8n-node prerelease"
 	},
