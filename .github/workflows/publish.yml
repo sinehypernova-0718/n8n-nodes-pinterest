@@ -126,18 +126,22 @@ jobs:
         run: |
           package_name=$(node -p "require('./package.json').name")
           package_version=$(node -p "require('./package.json').version")
-          output="$(npm view "$package_name@$package_version" version 2>&1)"
-          status=$?
-          if [ "$status" -eq 0 ]; then
+          # The default GitHub Actions shell runs with `set -e`, so a failing
+          # command-substitution assignment would abort the step. Checking the
+          # exit status inside an `if` condition (errexit-exempt) prevents that.
+          if output="$(npm view "$package_name@$package_version" version 2>&1)"; then
             echo "::warning::$package_name@$package_version is already on npm — skipping publication."
             echo "skip=true" >> "$GITHUB_OUTPUT"
-          elif printf '%s' "$output" | grep -q 'E404'; then
-            echo "$package_name@$package_version is not on npm yet (npm reported E404) — proceeding."
-            echo "skip=false" >> "$GITHUB_OUTPUT"
           else
-            echo "::error::npm view $package_name@$package_version failed with exit code $status (not an E404). Failing closed; refusing to publish without a confirmed not-published state."
-            printf '%s\n' "$output"
-            exit 1
+            status=$?
+            if printf '%s' "$output" | grep -q 'E404'; then
+              echo "$package_name@$package_version is not on npm yet (npm reported E404) — proceeding."
+              echo "skip=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "::error::npm view $package_name@$package_version failed with exit code $status (not an E404). Failing closed; refusing to publish without a confirmed not-published state."
+              printf '%s\n' "$output"
+              exit 1
+            fi
           fi
 
       - name: Verify NPM_TOKEN is configured
