@@ -1,3 +1,4 @@
+export { createBoardRequest } from './create';
 export { deleteBoardRequest } from './delete';
 export { getBoardRequest } from './get';
 export { listBoardsRequest } from './list';

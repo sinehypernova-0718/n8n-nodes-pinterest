@@ -1,4 +1,5 @@
 export {
+	createBoardRequest,
 	deleteBoardRequest,
 	getBoardRequest,
 	listBoardsRequest,
@@ -8,6 +9,7 @@ export {
 export {
 	createPinRequest,
 	deletePinRequest,
+	getPinAnalyticsRequest,
 	getPinRequest,
 	getMultiplePinsRequest,
 	listPinsRequest,

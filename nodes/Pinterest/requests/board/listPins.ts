@@ -79,7 +79,7 @@ export async function listBoardPinsRequest(
 					);
 				}
 			}
-			qs.creative_types = creativeTypes.join(',');
+			qs.creative_types = creativeTypes;
 		}
 	}
 
@@ -130,6 +130,10 @@ export async function listBoardPinsRequest(
 
 	if (Object.keys(qs).length > 0) {
 		requestOptions.qs = qs;
+	}
+
+	if (Array.isArray(qs.creative_types)) {
+		requestOptions.arrayFormat = 'repeat';
 	}
 
 	return requestOptions;

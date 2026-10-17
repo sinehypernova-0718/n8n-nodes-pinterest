@@ -89,7 +89,7 @@ export async function listPinsRequest(
 				);
 			}
 		}
-		qs.creative_types = creativeTypes.join(',');
+		qs.creative_types = creativeTypes;
 	}
 
 	const adAccountId = additionalFields.ad_account_id;
@@ -139,6 +139,10 @@ export async function listPinsRequest(
 
 	if (Object.keys(qs).length > 0) {
 		requestOptions.qs = qs;
+	}
+
+	if (Array.isArray(qs.creative_types)) {
+		requestOptions.arrayFormat = 'repeat';
 	}
 
 	return requestOptions;

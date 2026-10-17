@@ -10,11 +10,13 @@ import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workf
 import { boardFields, pinFields } from './descriptions';
 import { mapPinterestApiError } from './errors';
 import {
+	createBoardRequest,
 	createPinRequest,
 	deleteBoardRequest,
 	deletePinRequest,
 	getBoardRequest,
 	getMultiplePinsRequest,
+	getPinAnalyticsRequest,
 	getPinRequest,
 	listBoardPinsRequest,
 	listBoardsRequest,
@@ -271,6 +273,9 @@ export class Pinterest implements INodeType {
 							case 'getMultiple':
 								requestOptions = await getMultiplePinsRequest.call(this, i);
 								break;
+							case 'getAnalytics':
+								requestOptions = await getPinAnalyticsRequest.call(this, i);
+								break;
 							case 'update':
 								requestOptions = await updatePinRequest.call(this, i);
 								break;
@@ -290,6 +295,9 @@ export class Pinterest implements INodeType {
 						break;
 					case 'board':
 						switch (operation) {
+							case 'create':
+								requestOptions = await createBoardRequest.call(this, i);
+								break;
 							case 'get':
 								requestOptions = await getBoardRequest.call(this, i);
 								break;
