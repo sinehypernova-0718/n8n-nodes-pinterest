@@ -181,13 +181,12 @@ export const boardFields: INodeProperties[] = [
 				displayName: 'Privacy',
 				name: 'privacy',
 				type: 'options',
-				// eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
 				options: [
 					{ name: 'All', value: 'ALL' },
-					{ name: 'Public', value: 'PUBLIC' },
 					{ name: 'Protected', value: 'PROTECTED' },
-					{ name: 'Secret', value: 'SECRET' },
+					{ name: 'Public', value: 'PUBLIC' },
 					{ name: 'Public and Secret', value: 'PUBLIC_AND_SECRET' },
+					{ name: 'Secret', value: 'SECRET' },
 				],
 				default: 'PUBLIC',
 				description: 'Filter the boards by privacy setting',

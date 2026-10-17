@@ -367,10 +367,10 @@ export class Pinterest implements INodeType {
 					continue;
 				}
 				if (error instanceof NodeApiError || error instanceof NodeOperationError) {
-					// Already mapped at the request boundary; rethrow as-is to preserve the
-					// API error details or the local operation error.
-					// eslint-disable-next-line @n8n/community-nodes/require-node-api-error
-					throw error;
+					// Already mapped at the request boundary. Route the re-throw through the
+					// mapper so the existing n8n error instance (API error details or local
+					// operation error) is preserved without re-throwing the raw catch value.
+					throw mapPinterestApiError(error, { itemIndex: i });
 				}
 				throw new NodeOperationError(this.getNode(), error as Error, { itemIndex: i });
 			}
