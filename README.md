@@ -78,13 +78,13 @@ Install the package through your n8n instance using the community node installat
 1. Open your n8n instance.
 2. Navigate to **Settings → Community Nodes**.
 3. Select **Install**.
-4. Enter the package's final published npm name.
+4. Enter the package name `@sinehypernova-0718/n8n-nodes-pinterest`.
 5. Review and accept the installation confirmation.
 6. Once installation completes, open a workflow and search for the Pinterest node.
 
 For detailed instructions, see the [n8n community nodes installation guide](https://docs.n8n.io/integrations/community-nodes/installation/).
 
-> **Note:** The package name entered during installation must match the name under which this project is published to npm. Community node installation availability also depends on your n8n deployment configuration and administrator policies.
+> **Note:** The package name entered during installation must match the name under which this project is published to npm (`@sinehypernova-0718/n8n-nodes-pinterest`). Community node installation availability also depends on your n8n deployment configuration and administrator policies.
 
 ## ⚙️ Operations
 
@@ -98,7 +98,7 @@ The Pin resource supports operations for managing Pins and retrieving their asso
 |---|---|
 | Create | Create a Pin using the supported Pinterest API parameters. |
 | Get | Retrieve an individual Pin by its ID. |
-| Get Multiple | Retrieve multiple Pins using the supported API functionality. |
+| Get Multiple Pin Analytics | Retrieve analytics for multiple Pins in a batch request, using the supported analytics metrics and date range. |
 | List | List Pins with supported filters and pagination. |
 | Update | Update supported fields of an existing Pin. |
 | Delete | Delete a Pin by its ID. |
@@ -113,7 +113,6 @@ The Board resource supports operations for managing boards and accessing their a
 |---|---|
 | Create | Create a Pinterest board. |
 | Get | Retrieve an individual board by its ID. |
-| Get Multiple | Retrieve multiple boards using the supported API functionality. |
 | List | List boards with pagination. |
 | Update | Update supported fields of an existing board. |
 | Delete | Delete a board by its ID. |
@@ -149,7 +148,7 @@ Create a Pinterest OAuth2 API credential in n8n and supply the values required b
 | Access token URL | `https://api.pinterest.com/v5/oauth/token` |
 | Client ID | The client ID issued for your Pinterest application |
 | Client secret | The client secret issued for your Pinterest application |
-| Scopes | `boards:read`, `boards:write`, `pins:read`, `pins:write` |
+| Scopes | `user_accounts:read`, `boards:read`, `boards:write`, `pins:read`, `pins:write` |
 
 Configure the OAuth redirect URL using the callback URL supplied by n8n. Register that URL with your Pinterest application wherever required by Pinterest's developer configuration.
 
@@ -157,7 +156,7 @@ Save the credential and use n8n's authorization flow to connect your Pinterest a
 
 ### Permissions and access
 
-The configured scopes cover the board and Pin read/write permissions used by the current implementation. Individual operations may still require specific permissions, resource access, or additional API eligibility.
+The configured scopes cover the board and Pin read/write permissions used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint. Individual operations may still require specific permissions, resource access, or additional API eligibility.
 
 Pin analytics availability and supported metrics are subject to Pinterest's API requirements. Application approval status, access restrictions, and Pinterest-side changes can affect whether an operation succeeds.
 

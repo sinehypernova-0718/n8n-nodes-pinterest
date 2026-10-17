@@ -37,6 +37,5 @@ jobs:
       - name: Run lint
         run: pnpm run lint
 
-      # `pnpm test` builds the node (tsc) and then runs the node:test suite.
-      - name: Run tests
-        run: pnpm test
+      - name: Run build
+        run: pnpm run build

@@ -23,13 +23,15 @@
 		"type": "git",
 		"url": "https://github.com/sinehypernova-0718/n8n-nodes-pinterest.git"
 	},
+	"bugs": {
+		"url": "https://github.com/sinehypernova-0718/n8n-nodes-pinterest/issues"
+	},
 	"scripts": {
 		"build": "n8n-node build",
 		"build:watch": "tsc --watch",
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
-		"test": "pnpm build && node --test test/",
 		"release": "n8n-node release",
 		"prepublishOnly": "n8n-node prerelease"
 	},

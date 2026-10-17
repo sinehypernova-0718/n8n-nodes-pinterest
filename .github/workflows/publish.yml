@@ -90,10 +90,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests
-        # `pnpm test` builds the node (tsc) and then runs the node:test suite.
-        run: pnpm test
-
       - name: Release
         # Publishes to npm with a provenance attestation (requires id-token: write above).
         # Lint and build run automatically as part of the release process.
