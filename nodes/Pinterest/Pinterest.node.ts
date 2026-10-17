@@ -210,7 +210,7 @@ export class Pinterest implements INodeType {
 		group: ['transform'],
 		version: 1,
 		description:
-			'Pinterest integration for n8n. Automate Pins, Boards, and Pinterest API workflows with a community-built node.',
+			'Pinterest integration for n8n. Integrate Pinterest with n8n to automate API workflows, manage content, access analytics, and more.',
 		subtitle: '',
 		defaults: {
 			name: 'Pinterest',

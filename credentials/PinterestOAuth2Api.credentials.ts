@@ -1,4 +1,9 @@
-import type { Icon, ICredentialType, INodeProperties } from 'n8n-workflow';
+import type {
+	Icon,
+	ICredentialTestRequest,
+	ICredentialType,
+	INodeProperties,
+} from 'n8n-workflow';
 
 export class PinterestOAuth2Api implements ICredentialType {
 	name = 'pinterestOAuth2Api';
@@ -36,7 +41,7 @@ export class PinterestOAuth2Api implements ICredentialType {
 			displayName: 'Scope',
 			name: 'scope',
 			type: 'hidden',
-			default: 'boards:read,boards:write,pins:read,pins:write',
+			default: 'user_accounts:read,boards:read,boards:write,pins:read,pins:write',
 		},
 		{
 			displayName: 'Auth URI Query Parameters',
@@ -51,4 +56,12 @@ export class PinterestOAuth2Api implements ICredentialType {
 			default: 'header',
 		},
 	];
+
+	test: ICredentialTestRequest = {
+		request: {
+			method: 'GET',
+			baseURL: 'https://api.pinterest.com/v5',
+			url: '/user_account',
+		},
+	};
 }
