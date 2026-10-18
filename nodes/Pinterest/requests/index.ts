@@ -2,6 +2,7 @@ export {
 	createBoardRequest,
 	createBoardSectionRequest,
 	deleteBoardRequest,
+	deleteBoardSectionRequest,
 	getBoardRequest,
 	listBoardsRequest,
 	listBoardPinsRequest,

@@ -14,6 +14,7 @@ import {
 	createBoardSectionRequest,
 	createPinRequest,
 	deleteBoardRequest,
+	deleteBoardSectionRequest,
 	deletePinRequest,
 	getBoardRequest,
 	getMultiplePinsRequest,
@@ -313,6 +314,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'delete':
 								requestOptions = await deleteBoardRequest.call(this, i);
+								break;
+							case 'deleteSection':
+								requestOptions = await deleteBoardSectionRequest.call(this, i);
 								break;
 							case 'update':
 								requestOptions = await updateBoardRequest.call(this, i);

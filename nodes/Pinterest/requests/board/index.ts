@@ -1,6 +1,7 @@
 export { createBoardRequest } from './create';
 export { createBoardSectionRequest } from './createSection';
 export { deleteBoardRequest } from './delete';
+export { deleteBoardSectionRequest } from './deleteSection';
 export { getBoardRequest } from './get';
 export { listBoardsRequest } from './list';
 export { listBoardPinsRequest } from './listPins';
