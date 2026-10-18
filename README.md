@@ -14,19 +14,18 @@
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-**n8n-nodes-pinterest** brings Pinterest API operations into n8n workflows, letting you work with Pinterest resources through the workflow editor instead of manually constructing API requests.
+**@sinehypernova-0718/n8n-nodes-pinterest** brings Pinterest API operations into n8n workflows, letting you work with Pinterest resources through the workflow editor instead of manually constructing API requests.
 
 ## ✨ Features
 
-- **Pinterest API integration** — interact with supported Pinterest resources and operations directly from n8n workflows.
-- **OAuth2 authentication** — authenticate requests using Pinterest OAuth2 credentials.
-- **Native n8n interface** — select resources and operations and configure their parameters through the workflow editor.
-- **Pin management** — create, retrieve, list, update, delete, and save Pins using supported Pinterest API operations.
-- **Board management** — create, retrieve, list, update, and delete boards, and retrieve Pins associated with a board.
-- **Pin analytics** — retrieve analytics for supported metrics and date ranges.
-- **Pagination support** — retrieve paginated API results where supported by an operation.
-- **Modular TypeScript architecture** — resource descriptions, request builders, and execution logic are organized by responsibility.
-- **Extensible design** — add further Pinterest resources and operations while preserving the existing architecture.
+- **Pinterest API v5 integration** — interact with supported Pinterest resources directly from n8n workflows.
+- **OAuth2 authentication** — authorize API requests using Pinterest OAuth2 credentials.
+- **Native n8n interface** — select resources, operations, and parameters through the workflow editor.
+- **Pin management** — create, retrieve, list, update, delete, and save Pins.
+- **Board management** — create, retrieve, list, update, and delete boards and board sections, and retrieve Pins associated with boards.
+- **Pin analytics** — retrieve supported analytics metrics over specified date ranges.
+- **Pagination support** — retrieve paginated results where supported by the relevant operation.
+
 
 ## 📁 Repository Structure
 
@@ -105,18 +104,23 @@ The Pin resource supports operations for managing Pins and retrieving their asso
 | Save | Save a Pin to a board. |
 | Get Analytics | Retrieve analytics for a Pin using supported metrics and date parameters. |
 
-### Boards
-
-The Board resource supports operations for managing boards and accessing their associated Pins.
+### Board
 
 | Operation | Description |
 |---|---|
-| Create | Create a Pinterest board. |
-| Get | Retrieve an individual board by its ID. |
-| List | List boards with pagination. |
-| Update | Update supported fields of an existing board. |
-| Delete | Delete a board by its ID. |
-| List Pins | Retrieve Pins associated with a board. |
+| Create | Create a new board. |
+| Create Board Section | Create a new board section. |
+| Delete | Delete a single board. |
+| Delete Board Section | Delete a single board section. |
+| Get | Get a single board. |
+| List | List boards. |
+| List Board Sections | List sections of a board. |
+| List Pins | List Pins on a board. |
+| List Pins on Board Section | List Pins on a board section. |
+| Update | Update a single board. |
+| Update Board Section | Update a single board section. |
+
+The **List** operation for Pins supports **Return All** and **Limit**. The board listing operations (List, List Pins, List Board Sections, and List Pins on Board Section) follow Pinterest's pagination bookmarks and return all pages. Pin, board, and board section IDs are numeric identifiers; operations that look up a resource by ID expect digits only.
 
 Operation parameters, filters, pagination behavior, and available analytics metrics vary by endpoint. Refer to the operation descriptions in the n8n editor and the [Pinterest API v5 documentation](https://developers.pinterest.com/docs/api/v5/) for endpoint-specific requirements.
 
@@ -177,7 +181,7 @@ The package declares its n8n node metadata and entry points in `package.json`. C
 
 Refer to the repository's package metadata and release notes when evaluating compatibility with a particular n8n version.
 
-The initial `0.1.0` release is a pre-1.0 release. Operation coverage and compatibility may evolve as the integration develops.
+The `0.1.x` releases are pre-1.0 releases. Operation coverage and compatibility may evolve as the integration develops.
 
 ## 🚀 Usage
 
@@ -216,6 +220,16 @@ For general workflow guidance, see the [n8n Try it out documentation](https://do
 - [GitHub repository](https://github.com/sinehypernova-0718/n8n-nodes-pinterest) — source code, issues, and contributions.
 
 ## 📝 Version history
+
+### `0.1.1`
+
+Adds board section management to the Pinterest integration for n8n.
+
+- Adds Create Board Section, Delete Board Section, Update Board Section, and List Board Sections operations.
+- Adds List Pins on Board Section to retrieve Pins associated with a board section.
+- Includes pagination for the new board section listing operations where implemented.
+
+This release extends the Board resource with board section management while preserving the existing integration structure.
 
 ### `0.1.0`
 
