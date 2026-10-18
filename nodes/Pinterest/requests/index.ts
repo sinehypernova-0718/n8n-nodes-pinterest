@@ -1,5 +1,6 @@
 export {
 	createBoardRequest,
+	createBoardSectionRequest,
 	deleteBoardRequest,
 	getBoardRequest,
 	listBoardsRequest,

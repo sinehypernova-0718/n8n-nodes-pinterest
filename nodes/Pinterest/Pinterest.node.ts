@@ -11,6 +11,7 @@ import { boardFields, pinFields } from './descriptions';
 import { mapPinterestApiError } from './errors';
 import {
 	createBoardRequest,
+	createBoardSectionRequest,
 	createPinRequest,
 	deleteBoardRequest,
 	deletePinRequest,
@@ -297,6 +298,9 @@ export class Pinterest implements INodeType {
 						switch (operation) {
 							case 'create':
 								requestOptions = await createBoardRequest.call(this, i);
+								break;
+							case 'createSection':
+								requestOptions = await createBoardSectionRequest.call(this, i);
 								break;
 							case 'get':
 								requestOptions = await getBoardRequest.call(this, i);

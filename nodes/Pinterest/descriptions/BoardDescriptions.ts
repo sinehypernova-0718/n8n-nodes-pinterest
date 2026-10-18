@@ -19,10 +19,22 @@ export const boardFields: INodeProperties[] = [
 				action: 'Create a board',
 			},
 			{
+				name: 'Create Board Section',
+				value: 'createSection',
+				description: 'Create a new board section',
+				action: 'Create a board section',
+			},
+			{
 				name: 'Delete',
 				value: 'delete',
 				description: 'Delete a single board',
 				action: 'Delete a board',
+			},
+			{
+				name: 'Delete Board Section',
+				value: 'deleteSection',
+				description: 'Delete a single board section',
+				action: 'Delete a board section',
 			},
 			{
 				name: 'Get',
@@ -37,16 +49,34 @@ export const boardFields: INodeProperties[] = [
 				action: 'List boards',
 			},
 			{
+				name: 'List Board Sections',
+				value: 'listSections',
+				description: 'List sections of a board',
+				action: 'List board sections',
+			},
+			{
 				name: 'List Pins',
 				value: 'listPins',
 				description: 'List Pins on a board',
 				action: 'List pins on a board',
 			},
 			{
+				name: 'List Pins on Board Section',
+				value: 'listSectionPins',
+				description: 'List Pins on a board section',
+				action: 'List pins on a board section',
+			},
+			{
 				name: 'Update',
 				value: 'update',
 				description: 'Update a single board',
 				action: 'Update a board',
+			},
+			{
+				name: 'Update Board Section',
+				value: 'updateSection',
+				description: 'Update a single board section',
+				action: 'Update a board section',
 			},
 		],
 		default: 'create',
@@ -426,6 +456,312 @@ export const boardFields: INodeProperties[] = [
 				type: 'boolean',
 				default: false,
 				description: 'Whether to include 90-day and lifetime Pin metrics',
+			},
+		],
+	},
+
+	// ----------------------------------
+	//        board:listSections
+	// ----------------------------------
+	{
+		displayName: 'Board ID',
+		name: 'boardId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['listSections'],
+			},
+		},
+		description: 'Numeric ID of the board whose sections you want to retrieve',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['listSections'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Ad Account ID',
+				name: 'ad_account_id',
+				type: 'string',
+				default: '',
+				description: 'Advertising account identifier. Numeric only, up to 18 characters.',
+			},
+			{
+				displayName: 'Bookmark',
+				name: 'bookmark',
+				type: 'string',
+				default: '',
+				description: 'Pagination cursor for fetching the next page',
+			},
+			{
+				displayName: 'Page Size',
+				name: 'page_size',
+				type: 'number',
+				typeOptions: {
+					minValue: 1,
+					maxValue: 250,
+				},
+				default: 25,
+				description: 'Number of board sections to return per page, from 1 to 250',
+			},
+		],
+	},
+
+	// ----------------------------------
+	//        board:createSection
+	// ----------------------------------
+	{
+		displayName: 'Board ID',
+		name: 'boardId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['createSection'],
+			},
+		},
+		description: 'Numeric ID of the board where the board section will be created',
+	},
+	{
+		displayName: 'Name',
+		name: 'name',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['createSection'],
+			},
+		},
+		description: 'Name of the board section, from 1 to 180 characters',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['createSection'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Ad Account ID',
+				name: 'ad_account_id',
+				type: 'string',
+				default: '',
+				description: 'Advertising account identifier. Numeric only, up to 18 characters.',
+			},
+		],
+	},
+
+	// ----------------------------------
+	//        board:deleteSection
+	// ----------------------------------
+	{
+		displayName: 'Board ID',
+		name: 'boardId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['deleteSection'],
+			},
+		},
+		description: 'Numeric ID of the board that owns the board section',
+	},
+	{
+		displayName: 'Section ID',
+		name: 'sectionId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['deleteSection'],
+			},
+		},
+		description: 'Numeric ID of the board section to delete',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['deleteSection'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Ad Account ID',
+				name: 'ad_account_id',
+				type: 'string',
+				default: '',
+				description: 'Advertising account identifier. Numeric only, up to 18 characters.',
+			},
+		],
+	},
+
+	// ----------------------------------
+	//        board:updateSection
+	// ----------------------------------
+	{
+		displayName: 'Board ID',
+		name: 'boardId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['updateSection'],
+			},
+		},
+		description: 'Numeric ID of the board that owns the board section',
+	},
+	{
+		displayName: 'Section ID',
+		name: 'sectionId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['updateSection'],
+			},
+		},
+		description: 'Numeric ID of the board section to update',
+	},
+	{
+		displayName: 'Name',
+		name: 'name',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['updateSection'],
+			},
+		},
+		description: 'New name of the board section, from 1 to 180 characters',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['updateSection'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Ad Account ID',
+				name: 'ad_account_id',
+				type: 'string',
+				default: '',
+				description: 'Advertising account identifier. Numeric only, up to 18 characters.',
+			},
+		],
+	},
+
+	// ----------------------------------
+	//       board:listSectionPins
+	// ----------------------------------
+	{
+		displayName: 'Board ID',
+		name: 'boardId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['listSectionPins'],
+			},
+		},
+		description: 'Numeric ID of the board that owns the board section',
+	},
+	{
+		displayName: 'Section ID',
+		name: 'sectionId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['listSectionPins'],
+			},
+		},
+		description: 'Numeric ID of the board section whose Pins you want to retrieve',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['board'],
+				operation: ['listSectionPins'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Ad Account ID',
+				name: 'ad_account_id',
+				type: 'string',
+				default: '',
+				description: 'Advertising account identifier. Numeric only, up to 18 characters.',
+			},
+			{
+				displayName: 'Bookmark',
+				name: 'bookmark',
+				type: 'string',
+				default: '',
+				description: 'Pagination cursor for fetching the next page',
+			},
+			{
+				displayName: 'Page Size',
+				name: 'page_size',
+				type: 'number',
+				typeOptions: {
+					minValue: 1,
+					maxValue: 250,
+				},
+				default: 25,
+				description: 'Number of Pins to return per page, from 1 to 250',
 			},
 		],
 	},
