@@ -21,6 +21,7 @@ import {
 	getPinAnalyticsRequest,
 	getPinRequest,
 	listBoardPinsRequest,
+	listBoardSectionsRequest,
 	listBoardsRequest,
 	listPinsRequest,
 	savePinRequest,
@@ -205,6 +206,61 @@ async function collectBoardPinsListPages(
 	return collected;
 }
 
+async function collectBoardSectionsListPages(
+	this: IExecuteFunctions,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'pinterestOAuth2Api',
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw mapPinterestApiError(error, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await listBoardSectionsRequest.call(this, itemIndex, nextBookmark);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return collected;
+}
+
 export class Pinterest implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Pinterest',
@@ -313,6 +369,9 @@ export class Pinterest implements INodeType {
 							case 'listPins':
 								requestOptions = await listBoardPinsRequest.call(this, i);
 								break;
+							case 'listSections':
+								requestOptions = await listBoardSectionsRequest.call(this, i);
+								break;
 							case 'delete':
 								requestOptions = await deleteBoardRequest.call(this, i);
 								break;
@@ -346,6 +405,8 @@ export class Pinterest implements INodeType {
 					responseData = await collectBoardListPages.call(this, requestOptions, i);
 				} else if (resource === 'board' && operation === 'listPins') {
 					responseData = await collectBoardPinsListPages.call(this, requestOptions, i);
+				} else if (resource === 'board' && operation === 'listSections') {
+					responseData = await collectBoardSectionsListPages.call(this, requestOptions, i);
 				} else {
 					const options: IHttpRequestOptions = {
 						baseURL: PINTEREST_API_BASE_URL,

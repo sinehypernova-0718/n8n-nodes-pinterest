@@ -5,5 +5,6 @@ export { deleteBoardSectionRequest } from './deleteSection';
 export { getBoardRequest } from './get';
 export { listBoardsRequest } from './list';
 export { listBoardPinsRequest } from './listPins';
+export { listBoardSectionsRequest } from './listSections';
 export { updateBoardRequest } from './update';
 export { updateBoardSectionRequest } from './updateSection';

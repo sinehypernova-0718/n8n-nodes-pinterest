@@ -6,6 +6,7 @@ export {
 	getBoardRequest,
 	listBoardsRequest,
 	listBoardPinsRequest,
+	listBoardSectionsRequest,
 	updateBoardRequest,
 	updateBoardSectionRequest,
 } from './board';
