@@ -25,6 +25,7 @@ import {
 	listPinsRequest,
 	savePinRequest,
 	updateBoardRequest,
+	updateBoardSectionRequest,
 	updatePinRequest,
 } from './requests';
 
@@ -320,6 +321,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'update':
 								requestOptions = await updateBoardRequest.call(this, i);
+								break;
+							case 'updateSection':
+								requestOptions = await updateBoardSectionRequest.call(this, i);
 								break;
 							default:
 								throw new NodeOperationError(
