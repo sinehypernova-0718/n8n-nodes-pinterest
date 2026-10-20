@@ -1,5 +1,5 @@
  <p align="center">
-  <img src="https://raw.githubusercontent.com/n8n-io/n8n/master/assets/n8n-logo.png" width="200" alt="n8n" />
+  <img src="n8n-logo-white-accent.svg" width="200" alt="n8n" />
 </p>
 
 <h1 align="center">n8n-nodes-pinterest</h1>
