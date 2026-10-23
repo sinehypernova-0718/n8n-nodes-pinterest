@@ -174,14 +174,57 @@ This package is designed for n8n's community node ecosystem and uses the n8n nod
 - **Implementation language:** TypeScript.
 - **API:** Pinterest API v5.
 - **Authentication:** OAuth2.
-- **Package distribution:** npm.
-- **Development package manager:** pnpm.
+- **Package distribution:** npm — published by GitHub Actions with npm provenance.
+- **Development package manager:** pnpm — pinned through the `packageManager` field in `package.json` and `pnpm-lock.yaml`.
 
 The package declares its n8n node metadata and entry points in `package.json`. Compatibility depends on the n8n version, the available `n8n-workflow` APIs, and the package's dependencies.
 
 Refer to the repository's package metadata and release notes when evaluating compatibility with a particular n8n version.
 
 The `0.1.x` releases are pre-1.0 releases. Operation coverage and compatibility may evolve as the integration develops.
+
+## 🛠️ Development
+
+### Requirements
+
+- **[Node.js](https://nodejs.org/)** (v22 or higher) and **pnpm**
+- **[git](https://git-scm.com/downloads)**
+- **[Corepack](https://nodejs.org/api/corepack.html)** (optional) — pnpm 12.4.2 is pinned in `package.json` via the `packageManager` field
+
+```bash
+corepack enable
+pnpm install
+```
+
+### Available scripts
+
+| Script | Description |
+| --- | --- |
+| `pnpm run dev` | Start n8n with the Pinterest node and watch for changes. |
+| `pnpm run build` | Compile TypeScript to JavaScript for production. |
+| `pnpm run build:watch` | Build in watch mode. |
+| `pnpm run lint` | Check code for errors and style issues. |
+| `pnpm run lint:fix` | Automatically fix lint issues where possible. |
+| `pnpm run release:local` | Create a local release: bump the version, update the changelog, commit, tag (`vX.Y.Z`), and push. |
+| `pnpm run release` | The GitHub Actions publish entry point; builds and publishes to npm with provenance. |
+
+> **Note:** Use `pnpm run release:local` to create and push a release tag. The repository's `.release-it.json` configures the `master` branch, the `vX.Y.Z` tag format, and changelog generation.
+
+### Release process
+
+Releases are published by GitHub Actions, never from a local machine, so every published version carries an npm provenance attestation (required by n8n for verified community nodes).
+
+1. Make sure `master` is up to date and the working tree is clean.
+2. Run `pnpm run release:local`. It lints, builds, prompts for a version bump, updates `CHANGELOG.md`, commits, creates a `vX.Y.Z` tag, and pushes it.
+3. The tag push triggers `.github/workflows/publish.yml`, which checks out the tag, verifies it matches `package.json`, checks whether the version is already on npm, and publishes it with provenance.
+
+> **Note:** release-it also creates a GitHub release and needs a `GITHUB_TOKEN` with `repo` scope (for example, `export GITHUB_TOKEN=$(gh auth token)`). Without it, release-it opens the GitHub release page in a browser.
+
+### Required repository configuration
+
+- A repository secret named `NPM_TOKEN` holding an npm granular access token with **read and write** publish permission for `@sinehypernova-0718/n8n-nodes-pinterest`.
+- The default branch must be `master`; CI and the publish workflow are configured for it.
+- `@n8n/node-cli` version 0.23.0 or later is required for npm provenance support.
 
 ## 🚀 Usage
 

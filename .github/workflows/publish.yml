@@ -164,13 +164,11 @@ jobs:
         # (`n8n-node prerelease`) to pass — without it, publication fails by
         # design. NPM_CONFIG_ACCESS has npm treat it as `--access public`,
         # which is required for the first publication of a scoped package.
-        # NPM_TOKEN (repo secret) has already been verified non-empty in a
-        # prior step and is written to .npmrc here before publishing.
+        # NODE_AUTH_TOKEN is the secret that actions/setup-node writes into the
+        # project .npmrc, so the token itself is never written to disk here.
         if: steps.published.outputs.skip == 'false'
-        run: |
-          npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
-          pnpm run release
+        run: pnpm run release
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           RELEASE_MODE: 'true'
           NPM_CONFIG_ACCESS: 'public'
