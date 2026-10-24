@@ -1,5 +1,5 @@
  <p align="center">
-  <img src="n8n-logo-white-accent.svg" width="200" alt="n8n" />
+  <img src="n8n-logo-black-accent.svg" width="200" alt="n8n" />
 </p>
 
 <h1 align="center">n8n-nodes-pinterest</h1>
