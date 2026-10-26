@@ -308,6 +308,21 @@ For general workflow guidance, see the [n8n Try it out documentation](https://do
 
 ## 📝 Version history
 
+### `0.1.2`
+
+Adds video media uploads and product-tag management to the Pinterest integration for n8n.
+
+- Adds the **Media** resource with **Upload Video**, **Get Upload**, and **List Uploads** operations.
+- Supports MP4, M4V, and MOV video uploads up to 512 MB, with optional processing polling and sanitized upload responses.
+- Adds **Add Product Tags**, **List Product Tags**, and **Remove Product Tags** operations to the **Pin** resource.
+- Validates hero and product Pin IDs locally, rejects empty product Pin IDs, and enforces the 1–24 limit and duplicate rejection for Add Product Tags.
+- Documents product-tag eligibility rejection codes and association-only removal semantics.
+- Adds bookmark pagination for media upload listings.
+- Updates release automation, publish workflow handling, node metadata, and brand assets.
+- Expands README documentation for media uploads, product tags, permissions, and release details.
+
+This release extends the integration with video media handling and Pin product-tag management while preserving the existing resources and operations.
+
 ### `0.1.1`
 
 Adds board section management to the Pinterest integration for n8n.
