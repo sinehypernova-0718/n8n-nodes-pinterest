@@ -13,6 +13,12 @@ export const pinFields: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Add Product Tags',
+				value: 'addProductTags',
+				description: 'Add product tags to a hero pin',
+				action: 'Add product tags to a pin',
+			},
+			{
 				name: 'Create',
 				value: 'create',
 				description: 'Create a new pin',
@@ -49,6 +55,19 @@ export const pinFields: INodeProperties[] = [
 				action: 'List pins',
 			},
 			{
+				name: 'List Product Tags',
+				value: 'listProductTags',
+				description: 'List product tags on a hero pin',
+				action: 'List product tags on a pin',
+			},
+			{
+				name: 'Remove Product Tags',
+				value: 'removeProductTags',
+				description:
+					'Remove product-tag associations from a hero pin without deleting pins or products',
+				action: 'Remove product tags from a pin',
+			},
+			{
 				name: 'Save Pin',
 				value: 'save',
 				description: 'Save a pin',
@@ -62,6 +81,40 @@ export const pinFields: INodeProperties[] = [
 			},
 		],
 		default: 'create',
+	},
+
+	// ----------------------------------
+	//      pin:addProductTags
+	// ----------------------------------
+	{
+		displayName: 'Hero Pin ID',
+		name: 'heroPinId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['pin'],
+				operation: ['addProductTags'],
+			},
+		},
+		description: 'Numeric ID of the hero Pin that will receive the product tags',
+	},
+	{
+		displayName: 'Product Pin IDs',
+		name: 'productPinIds',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: '1234567890, 0987654321',
+		displayOptions: {
+			show: {
+				resource: ['pin'],
+				operation: ['addProductTags'],
+			},
+		},
+		description:
+			'Comma-separated list of 1–24 product Pin IDs. These are Pin IDs, not catalog item IDs.',
 	},
 
 	// ----------------------------------
@@ -424,6 +477,24 @@ export const pinFields: INodeProperties[] = [
 		],
 	},
 	// ----------------------------------
+	//      pin:listProductTags
+	// ----------------------------------
+	{
+		displayName: 'Hero Pin ID',
+		name: 'heroPinId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['pin'],
+				operation: ['listProductTags'],
+			},
+		},
+		description: 'Numeric ID of the hero Pin whose product tags will be listed',
+	},
+
+	// ----------------------------------
 	//      pin:getMultiple
 	// ----------------------------------
 	{
@@ -728,6 +799,40 @@ export const pinFields: INodeProperties[] = [
 		description: 'Optional numeric ad account ID (maximum 18 digits)',
 	},
 	
+	// ----------------------------------
+	//     pin:removeProductTags
+	// ----------------------------------
+	{
+		displayName: 'Hero Pin ID',
+		name: 'heroPinId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['pin'],
+				operation: ['removeProductTags'],
+			},
+		},
+		description: 'Numeric ID of the hero Pin whose product-tag associations will be removed',
+	},
+	{
+		displayName: 'Product Pin IDs',
+		name: 'productPinIds',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: '1234567890, 0987654321',
+		displayOptions: {
+			show: {
+				resource: ['pin'],
+				operation: ['removeProductTags'],
+			},
+		},
+		description:
+			'Comma-separated list of 1–24 product Pin IDs to remove. This removes associations only; it does not delete Pins or products.',
+	},
+
 	// ----------------------------------
 	//       pin:getAnalytics
 	// ----------------------------------

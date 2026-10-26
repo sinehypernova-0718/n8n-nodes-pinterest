@@ -11,6 +11,7 @@ import { PINTEREST_API_BASE_URL } from './constants';
 import { boardFields, mediaFields, pinFields } from './descriptions';
 import { mapPinterestApiError } from './errors';
 import {
+	addProductTagsRequest,
 	createBoardRequest,
 	createBoardSectionRequest,
 	createPinRequest,
@@ -28,8 +29,11 @@ import {
 	listBoardsRequest,
 	listMediaRequest,
 	listPinsRequest,
+	listProductTagsRequest,
 	normalizeMediaUpload,
 	normalizeMediaUploadList,
+	normalizeProductTagRemovalResponse,
+	removeProductTagsRequest,
 	savePinRequest,
 	updateBoardRequest,
 	updateBoardSectionRequest,
@@ -448,6 +452,9 @@ export class Pinterest implements INodeType {
 				switch (resource) {
 					case 'pin':
 						switch (operation) {
+							case 'addProductTags':
+								requestOptions = await addProductTagsRequest.call(this, i);
+								break;
 							case 'create':
 								requestOptions = await createPinRequest.call(this, i);
 								break;
@@ -456,6 +463,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'list':
 								requestOptions = await listPinsRequest.call(this, i);
+								break;
+							case 'listProductTags':
+								requestOptions = await listProductTagsRequest.call(this, i);
 								break;
 							case 'getMultiple':
 								requestOptions = await getMultiplePinsRequest.call(this, i);
@@ -468,6 +478,9 @@ export class Pinterest implements INodeType {
 								break;
 							case 'delete':
 								requestOptions = await deletePinRequest.call(this, i);
+								break;
+							case 'removeProductTags':
+								requestOptions = await removeProductTagsRequest.call(this, i);
 								break;
 							case 'save':
 								requestOptions = await savePinRequest.call(this, i);
@@ -588,6 +601,10 @@ export class Pinterest implements INodeType {
 
 						if (resource === 'media' && operation === 'get') {
 							responseData = normalizeMediaUpload(responseData, this.getNode(), i);
+						}
+
+						if (resource === 'pin' && operation === 'removeProductTags') {
+							responseData = normalizeProductTagRemovalResponse(responseData, this.getNode(), i);
 						}
 					}
 				}

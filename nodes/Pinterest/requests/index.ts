@@ -19,12 +19,16 @@ export {
 	uploadMediaVideo,
 } from './media';
 export {
+	addProductTagsRequest,
 	createPinRequest,
 	deletePinRequest,
 	getPinAnalyticsRequest,
 	getPinRequest,
 	getMultiplePinsRequest,
 	listPinsRequest,
+	listProductTagsRequest,
+	normalizeProductTagRemovalResponse,
+	removeProductTagsRequest,
 	savePinRequest,
 	updatePinRequest,
 } from './pin';

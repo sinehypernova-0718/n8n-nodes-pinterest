@@ -21,7 +21,7 @@
 - **Pinterest API v5 integration** — interact with supported Pinterest resources directly from n8n workflows.
 - **OAuth2 authentication** — authorize API requests using Pinterest OAuth2 credentials.
 - **Native n8n interface** — select resources, operations, and parameters through the workflow editor.
-- **Pin management** — create, retrieve, list, update, delete, and save Pins.
+- **Pin management** — create, retrieve, list, update, delete, and save Pins, and manage product-tag associations.
 - **Board management** — create, retrieve, list, update, and delete boards and board sections, and retrieve Pins associated with boards.
 - **Pin analytics** — retrieve supported analytics metrics over specified date ranges.
 - **Media uploads** — register, transfer, and track video uploads for video Pins, with optional processing polling.
@@ -106,14 +106,21 @@ The Pin resource supports operations for managing Pins and retrieving their asso
 
 | Operation | Description |
 |---|---|
+| Add Product Tags | Add product Pins as tags to a hero Pin. |
 | Create | Create a Pin using the supported Pinterest API parameters. |
 | Get | Retrieve an individual Pin by its ID. |
 | Get Multiple Pin Analytics | Retrieve analytics for multiple Pins in a batch request, using the supported analytics metrics and date range. |
 | List | List Pins with supported filters and pagination. |
+| List Product Tags | List the product-tag associations on a hero Pin. |
 | Update | Update supported fields of an existing Pin. |
 | Delete | Delete a Pin by its ID. |
+| Remove Product Tags | Remove product-tag associations from a hero Pin without deleting Pins or products. |
 | Save | Save a Pin to a board. |
 | Get Analytics | Retrieve analytics for a Pin using supported metrics and date parameters. |
+
+**Product tags** attach product Pins to a hero Pin. **Add Product Tags** and **Remove Product Tags** each accept a hero Pin ID and a comma-separated list of 1–24 product Pin IDs per request. These inputs are Pin IDs, not catalog item IDs. For Add Product Tags, Pinterest rejects duplicate `pin_id` values and applies eligibility checks; if any product Pin is ineligible, the entire request fails (all-or-nothing). Adding a Pin that is already tagged is a no-op success. **List Product Tags** returns the Pin IDs currently tagged to the hero Pin, or an empty array if there are none, and is not paginated. **Remove Product Tags** removes only the tag associations and returns HTTP 204 with no response body on success. Removing a tag that is not present is a no-op success. It does not delete the hero Pin, the product Pins, or any catalog products.
+
+Pinterest documents these `IneligibleProductTagReason` values for Add Product Tags: `PIN_MISSING`, `PIN_IS_PRIVATE`, `PRODUCT_METADATA_MISSING`, `PIN_NOT_FROM_VERIFIED_DOMAIN`, and `PIN_NOT_FROM_SAME_USER_AS_HERO_PIN`. A failed eligibility check returns HTTP 400 with the affected `pin_id` and its `error_message`.
 
 ### Board
 
@@ -185,7 +192,7 @@ Save the credential and use n8n's authorization flow to connect your Pinterest a
 
 ### Permissions and access
 
-The configured scopes cover the board, Pin, and media upload read/write permissions used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint. Individual operations may still require specific permissions, resource access, or additional API eligibility.
+The configured scopes cover the board, Pin, media upload, and product-tag operations used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint. Individual operations may still require specific permissions, resource access, or additional API eligibility.
 
 Pin analytics availability and supported metrics are subject to Pinterest's API requirements. Application approval status, access restrictions, and Pinterest-side changes can affect whether an operation succeeds.
 
