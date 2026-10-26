@@ -36,6 +36,7 @@ function readProductPinIds(
 	action: string,
 	itemIndex: number,
 	self: IExecuteFunctions,
+	enforceAddConstraints: boolean = true,
 ): string[] {
 	if (value === undefined || value === null || typeof value !== 'string') {
 		throw new NodeOperationError(self.getNode(), 'Product Pin IDs must be a string', { itemIndex });
@@ -56,7 +57,7 @@ function readProductPinIds(
 		});
 	}
 
-	if (productPinIds.length > MAX_PRODUCT_TAGS) {
+	if (enforceAddConstraints && productPinIds.length > MAX_PRODUCT_TAGS) {
 		throw new NodeOperationError(
 			self.getNode(),
 			`Product Pin IDs must contain between 1 and ${MAX_PRODUCT_TAGS} values`,
@@ -74,21 +75,23 @@ function readProductPinIds(
 		}
 	}
 
-	const seen = new Set<string>();
-	const duplicates = new Set<string>();
-	for (const pinId of productPinIds) {
-		if (seen.has(pinId)) {
-			duplicates.add(pinId);
+	if (enforceAddConstraints) {
+		const seen = new Set<string>();
+		const duplicates = new Set<string>();
+		for (const pinId of productPinIds) {
+			if (seen.has(pinId)) {
+				duplicates.add(pinId);
+			}
+			seen.add(pinId);
 		}
-		seen.add(pinId);
-	}
 
-	if (duplicates.size > 0) {
-		throw new NodeOperationError(
-			self.getNode(),
-			`Product Pin IDs must not contain duplicates: ${[...duplicates].join(', ')}`,
-			{ itemIndex },
-		);
+		if (duplicates.size > 0) {
+			throw new NodeOperationError(
+				self.getNode(),
+				`Product Pin IDs must not contain duplicates: ${[...duplicates].join(', ')}`,
+				{ itemIndex },
+			);
+		}
 	}
 
 	return productPinIds;
@@ -115,6 +118,7 @@ export async function addProductTagsRequest(
 		'add product tags to a Pin',
 		itemIndex,
 		this,
+		true,
 	);
 
 	return {
@@ -156,6 +160,7 @@ export async function removeProductTagsRequest(
 		'remove product tags from a Pin',
 		itemIndex,
 		this,
+		false,
 	);
 
 	return {
