@@ -1,6 +1,6 @@
 {
 	"name": "@sinehypernova-0718/n8n-nodes-pinterest",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"packageManager": "pnpm@12.4.2",
 	"description": "Pinterest integration for n8n. Integrate Pinterest with n8n to automate API workflows, manage content, access analytics, and more.",
 	"license": "MIT",
