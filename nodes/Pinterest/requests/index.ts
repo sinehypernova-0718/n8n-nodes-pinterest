@@ -12,6 +12,13 @@ export {
 	updateBoardSectionRequest,
 } from './board';
 export {
+	getMediaRequest,
+	listMediaRequest,
+	normalizeMediaUpload,
+	normalizeMediaUploadList,
+	uploadMediaVideo,
+} from './media';
+export {
 	createPinRequest,
 	deletePinRequest,
 	getPinAnalyticsRequest,

@@ -24,6 +24,7 @@
 - **Pin management** — create, retrieve, list, update, delete, and save Pins.
 - **Board management** — create, retrieve, list, update, and delete boards and board sections, and retrieve Pins associated with boards.
 - **Pin analytics** — retrieve supported analytics metrics over specified date ranges.
+- **Media uploads** — register, transfer, and track video uploads for video Pins, with optional processing polling.
 - **Pagination support** — retrieve paginated results where supported by the relevant operation.
 
 
@@ -35,13 +36,21 @@ n8n-nodes-pinterest/
 │   └── PinterestOAuth2Api.credentials.ts
 ├── nodes/
 │   └── Pinterest/
+│       ├── constants.ts
 │       ├── descriptions/
 │       │   ├── BoardDescriptions.ts
+│       │   ├── MediaDescriptions.ts
 │       │   ├── PinDescriptions.ts
 │       │   └── index.ts
 │       ├── requests/
 │       │   ├── board/
 │       │   │   ├── <operation>.ts
+│       │   │   └── index.ts
+│       │   ├── media/
+│       │   │   ├── <operation>.ts
+│       │   │   ├── multipart.ts
+│       │   │   ├── normalize.ts
+│       │   │   ├── validateUploadUrl.ts
 │       │   │   └── index.ts
 │       │   ├── pin/
 │       │   │   ├── <operation>.ts
@@ -56,15 +65,17 @@ n8n-nodes-pinterest/
 ### Architecture
 
 - **`credentials/`** — defines the Pinterest OAuth2 credentials used to authenticate requests.
+- **`constants.ts`** — defines shared Pinterest API configuration, such as the API base URL.
 - **`descriptions/`** — contains resource and operation definitions displayed in the n8n editor. Its `index.ts` explicitly exports the descriptions consumed by the main node.
 - **`requests/board/`** — contains request builders for Pinterest Board operations.
+- **`requests/media/`** — contains the Media request builders plus the multipart encoder, upload URL validation, and response normalization used by the video upload flow.
 - **`requests/pin/`** — contains request builders for Pinterest Pin operations.
 - **`requests/<resource>/<operation>.ts`** — keeps individual API request builders in separate operation-specific modules, such as `create.ts`, `get.ts`, `list.ts`, and `update.ts`.
 - **Resource `index.ts` files** — explicitly export the request builders belonging to each resource.
 - **`requests/index.ts`** — re-exports the resource-level barrels, providing a single import entry point for request modules.
-- **`Pinterest.node.ts`** — defines the n8n node and coordinates operation execution, authenticated HTTP requests, pagination, and error handling.
+- **`Pinterest.node.ts`** — defines the n8n node and coordinates operation execution, authenticated API requests, media storage transfers, pagination, and error handling.
 
-The architecture separates editor-facing configuration from API request construction and execution. Resource descriptions define the available operations and parameters, while request modules build operation-specific requests. The main node remains responsible for invoking authenticated HTTP requests through n8n's credential-aware helpers and handling execution results.
+The architecture separates editor-facing configuration from API request construction and execution. Resource descriptions define the available operations and parameters, while request modules build operation-specific requests. The main node remains responsible for invoking authenticated HTTP requests through n8n's credential-aware helpers, transferring media files to the storage URL returned by Pinterest, and handling execution results.
 
 Explicit exports keep imports predictable and avoid unnecessary wildcard exports. The resource-specific modules remain independent, while the barrel files provide convenient entry points without introducing another execution layer.
 
@@ -120,7 +131,21 @@ The Pin resource supports operations for managing Pins and retrieving their asso
 | Update | Update a single board. |
 | Update Board Section | Update a single board section. |
 
-The **List** operation for Pins supports **Return All** and **Limit**. The board listing operations (List, List Pins, List Board Sections, and List Pins on Board Section) follow Pinterest's pagination bookmarks and return all pages. Pin, board, and board section IDs are numeric identifiers; operations that look up a resource by ID expect digits only.
+### Media
+
+The Media resource supports Pinterest's media upload endpoints for video Pins. Image uploads and Media Library operations are not implemented.
+
+| Operation | Description |
+|---|---|
+| Get Upload | Retrieve the status of a media upload by its numeric media ID. |
+| List Uploads | List media uploads with bookmark pagination. |
+| Upload Video | Register a video upload, transfer the file to Pinterest media storage, and optionally wait for processing. |
+
+**Upload Video** reads a video from an n8n binary property and supports MP4, M4V, and MOV files up to 512 MB. The node registers the upload, sends the file directly to Pinterest's media storage, and then checks the upload status. When **Wait for Processing** is enabled, the node polls Pinterest until the video finishes processing, fails, or the configured timeout is reached. The upload URL and temporary upload credentials returned by Pinterest are never included in node output or error messages.
+
+Uploading a video does not create a Pin by itself. Use the returned `media_id` with the Pin resource to create a video Pin. Media uploads use the existing `pins:read` and `pins:write` scopes; no additional credential scopes are required.
+
+The **List** operation for Pins supports **Return All** and **Limit**. The board listing operations (List, List Pins, List Board Sections, and List Pins on Board Section) follow Pinterest's pagination bookmarks and return all pages. **List Uploads** follows bookmark pagination and supports **Return All** and **Limit**. Pin, board, board section, and media IDs are numeric identifiers; operations that look up a resource by ID expect digits only.
 
 Operation parameters, filters, pagination behavior, and available analytics metrics vary by endpoint. Refer to the operation descriptions in the n8n editor and the [Pinterest API v5 documentation](https://developers.pinterest.com/docs/api/v5/) for endpoint-specific requirements.
 
@@ -160,7 +185,7 @@ Save the credential and use n8n's authorization flow to connect your Pinterest a
 
 ### Permissions and access
 
-The configured scopes cover the board and Pin read/write permissions used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint. Individual operations may still require specific permissions, resource access, or additional API eligibility.
+The configured scopes cover the board, Pin, and media upload read/write permissions used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint. Individual operations may still require specific permissions, resource access, or additional API eligibility.
 
 Pin analytics availability and supported metrics are subject to Pinterest's API requirements. Application approval status, access restrictions, and Pinterest-side changes can affect whether an operation succeeds.
 
@@ -235,11 +260,23 @@ After installing the node and configuring OAuth2 credentials, you can incorporat
 1. Create a workflow in n8n.
 2. Add the Pinterest node.
 3. Select your Pinterest OAuth2 credential.
-4. Choose the resource you want to work with, such as **Pin** or **Board**.
+4. Choose the resource you want to work with, such as **Pin**, **Board**, or **Media**.
 5. Select the required operation.
 6. Configure its parameters, IDs, filters, and other required fields.
 7. Connect the node to the other nodes in your workflow.
 8. Execute the workflow and inspect the returned data.
+
+### Creating a video Pin
+
+Video Pins require a video upload before the Pin itself is created.
+
+1. Add a node that provides the video as binary data, such as an HTTP Request or file storage node.
+2. Add the Pinterest node and choose **Media → Upload Video**.
+3. Set **Binary Property** to the property that contains the video, and configure **Wait for Processing** if needed.
+4. Execute the node. The output includes the `media_id`, `media_type`, and processing `status`.
+5. Add another Pinterest node and choose **Pin → Create**.
+6. Set **Media Source Type** to **Video ID**, then set **Media ID** to the uploaded `media_id`, for example `{{ $json.media_id }}`.
+7. Provide a **Cover Image URL** (Pinterest requires a valid cover image for video Pins), then execute the Pin creation.
 
 ### Troubleshooting
 
