@@ -1,5 +1,5 @@
 {
-  "node": "n8n-nodes-pinterest",
+  "node": "@sinehypernova-0718/n8n-nodes-pinterest.pinterest",
   "nodeVersion": "1.0",
   "codexVersion": "1.0",
   "categories": ["Marketing & Content", "Finance & Accounting", "Sales"],
