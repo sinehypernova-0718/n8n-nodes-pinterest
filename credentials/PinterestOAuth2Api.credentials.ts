@@ -41,7 +41,7 @@ export class PinterestOAuth2Api implements ICredentialType {
 			displayName: 'Scope',
 			name: 'scope',
 			type: 'hidden',
-			default: 'user_accounts:read,boards:read,boards:write,pins:read,pins:write',
+			default: 'user_accounts:read,user_accounts:write,boards:read,boards:write,pins:read,pins:write',
 		},
 		{
 			displayName: 'Auth URI Query Parameters',
