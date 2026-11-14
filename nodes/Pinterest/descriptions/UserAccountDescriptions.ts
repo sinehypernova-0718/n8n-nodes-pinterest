@@ -240,11 +240,11 @@ export const userAccountFields: INodeProperties[] = [
 				name: 'pin_format',
 				type: 'options',
 				options: [
-					{ name: 'All', value: 'ALL' },
 					{ name: 'Ads Idea', value: 'ADS_IDEA' },
 					{ name: 'Ads Product', value: 'ADS_PRODUCT' },
 					{ name: 'Ads Standard', value: 'ADS_STANDARD' },
 					{ name: 'Ads Video', value: 'ADS_VIDEO' },
+					{ name: 'All', value: 'ALL' },
 					{ name: 'Organic Image', value: 'ORGANIC_IMAGE' },
 					{ name: 'Organic Product', value: 'ORGANIC_PRODUCT' },
 					{ name: 'Organic Video', value: 'ORGANIC_VIDEO' },
@@ -270,8 +270,8 @@ export const userAccountFields: INodeProperties[] = [
 				name: 'split_field',
 				type: 'options',
 				options: [
-					{ name: 'No Split', value: 'NO_SPLIT' },
 					{ name: 'App Type', value: 'APP_TYPE' },
+					{ name: 'No Split', value: 'NO_SPLIT' },
 					{ name: 'Owned Content', value: 'OWNED_CONTENT' },
 					{ name: 'Pin Format', value: 'PIN_FORMAT' },
 					{ name: 'Source', value: 'SOURCE' },
@@ -313,7 +313,7 @@ export const userAccountFields: INodeProperties[] = [
 				operation: ['getTopPinsAnalytics'],
 			},
 		},
-		description: 'Metric report end date (UTC).',
+		description: 'Metric report end date (UTC)',
 	},
 	{
 		displayName: 'Sort By',
@@ -432,11 +432,11 @@ export const userAccountFields: INodeProperties[] = [
 				name: 'pin_format',
 				type: 'options',
 				options: [
-					{ name: 'All', value: 'ALL' },
 					{ name: 'Ads Idea', value: 'ADS_IDEA' },
 					{ name: 'Ads Product', value: 'ADS_PRODUCT' },
 					{ name: 'Ads Standard', value: 'ADS_STANDARD' },
 					{ name: 'Ads Video', value: 'ADS_VIDEO' },
+					{ name: 'All', value: 'ALL' },
 					{ name: 'Organic Image', value: 'ORGANIC_IMAGE' },
 					{ name: 'Organic Product', value: 'ORGANIC_PRODUCT' },
 					{ name: 'Organic Video', value: 'ORGANIC_VIDEO' },
@@ -491,7 +491,7 @@ export const userAccountFields: INodeProperties[] = [
 				operation: ['getTopVideoPinsAnalytics'],
 			},
 		},
-		description: 'Metric report end date (UTC).',
+		description: 'Metric report end date (UTC)',
 	},
 	{
 		displayName: 'Sort By',
@@ -614,11 +614,11 @@ export const userAccountFields: INodeProperties[] = [
 				name: 'pin_format',
 				type: 'options',
 				options: [
-					{ name: 'All', value: 'ALL' },
 					{ name: 'Ads Idea', value: 'ADS_IDEA' },
 					{ name: 'Ads Product', value: 'ADS_PRODUCT' },
 					{ name: 'Ads Standard', value: 'ADS_STANDARD' },
 					{ name: 'Ads Video', value: 'ADS_VIDEO' },
+					{ name: 'All', value: 'ALL' },
 					{ name: 'Organic Image', value: 'ORGANIC_IMAGE' },
 					{ name: 'Organic Product', value: 'ORGANIC_PRODUCT' },
 					{ name: 'Organic Video', value: 'ORGANIC_VIDEO' },
@@ -668,7 +668,7 @@ export const userAccountFields: INodeProperties[] = [
 		name: 'limit',
 		type: 'number',
 		typeOptions: { minValue: 1, maxValue: 250 },
-		default: 25,
+		default: 50,
 		displayOptions: {
 			show: {
 				resource: ['userAccount'],
@@ -700,7 +700,7 @@ export const userAccountFields: INodeProperties[] = [
 		name: 'limit',
 		type: 'number',
 		typeOptions: { minValue: 1, maxValue: 250 },
-		default: 25,
+		default: 50,
 		displayOptions: {
 			show: {
 				resource: ['userAccount'],
@@ -775,7 +775,7 @@ export const userAccountFields: INodeProperties[] = [
 		name: 'limit',
 		type: 'number',
 		typeOptions: { minValue: 1, maxValue: 250 },
-		default: 25,
+		default: 50,
 		displayOptions: {
 			show: {
 				resource: ['userAccount'],
@@ -879,7 +879,7 @@ export const userAccountFields: INodeProperties[] = [
 		name: 'limit',
 		type: 'number',
 		typeOptions: { minValue: 1, maxValue: 250 },
-		default: 25,
+		default: 50,
 		displayOptions: {
 			show: {
 				resource: ['userAccount'],
@@ -1028,7 +1028,7 @@ export const userAccountFields: INodeProperties[] = [
 		name: 'limit',
 		type: 'number',
 		typeOptions: { minValue: 1, maxValue: 250 },
-		default: 25,
+		default: 50,
 		displayOptions: {
 			show: {
 				resource: ['userAccount'],

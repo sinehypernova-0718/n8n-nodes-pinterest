@@ -409,7 +409,7 @@ async function collectFollowersPages(
 	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
 	const limit = returnAll
 		? Number.POSITIVE_INFINITY
-		: (this.getNodeParameter('limit', itemIndex, 25) as number);
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
 
 	const collected: IDataObject[] = [];
 	const seenBookmarks = new Set<string>();
@@ -473,7 +473,7 @@ async function collectFollowingPages(
 	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
 	const limit = returnAll
 		? Number.POSITIVE_INFINITY
-		: (this.getNodeParameter('limit', itemIndex, 25) as number);
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
 
 	const collected: IDataObject[] = [];
 	const seenBookmarks = new Set<string>();
@@ -537,7 +537,7 @@ async function collectFollowingBoardsPages(
 	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
 	const limit = returnAll
 		? Number.POSITIVE_INFINITY
-		: (this.getNodeParameter('limit', itemIndex, 25) as number);
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
 
 	const collected: IDataObject[] = [];
 	const seenBookmarks = new Set<string>();
@@ -601,7 +601,7 @@ async function collectWebsitesPages(
 	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
 	const limit = returnAll
 		? Number.POSITIVE_INFINITY
-		: (this.getNodeParameter('limit', itemIndex, 25) as number);
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
 
 	const collected: IDataObject[] = [];
 	const seenBookmarks = new Set<string>();
@@ -665,7 +665,7 @@ async function collectFollowingInterestsPages(
 	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
 	const limit = returnAll
 		? Number.POSITIVE_INFINITY
-		: (this.getNodeParameter('limit', itemIndex, 25) as number);
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
 
 	const collected: IDataObject[] = [];
 	const seenBookmarks = new Set<string>();

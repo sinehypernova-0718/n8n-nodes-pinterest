@@ -13,7 +13,7 @@ export async function getWebsitesRequest(
 	if (returnAll) {
 		qs.page_size = 250;
 	} else {
-		const limit = this.getNodeParameter('limit', itemIndex, 25) as number;
+		const limit = this.getNodeParameter('limit', itemIndex, 50) as number;
 		if (!Number.isInteger(limit) || limit < 1 || limit > 250) {
 			throw new NodeOperationError(
 				this.getNode(),
