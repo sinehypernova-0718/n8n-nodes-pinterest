@@ -25,6 +25,7 @@
 - **Board management** — create, retrieve, list, update, and delete boards and board sections, and retrieve Pins associated with boards.
 - **Pin analytics** — retrieve supported analytics metrics over specified date ranges.
 - **Media uploads** — register, transfer, and track video uploads for video Pins, with optional processing polling.
+- **User account management** — retrieve account details and analytics, manage following relationships, and claim or verify websites.
 - **Pagination support** — retrieve paginated results where supported by the relevant operation.
 
 
@@ -41,6 +42,7 @@ n8n-nodes-pinterest/
 │       │   ├── BoardDescriptions.ts
 │       │   ├── MediaDescriptions.ts
 │       │   ├── PinDescriptions.ts
+│       │   ├── UserAccountDescriptions.ts
 │       │   └── index.ts
 │       ├── requests/
 │       │   ├── board/
@@ -53,6 +55,9 @@ n8n-nodes-pinterest/
 │       │   │   ├── validateUploadUrl.ts
 │       │   │   └── index.ts
 │       │   ├── pin/
+│       │   │   ├── <operation>.ts
+│       │   │   └── index.ts
+│       │   ├── userAccount/
 │       │   │   ├── <operation>.ts
 │       │   │   └── index.ts
 │       │   └── index.ts
@@ -70,6 +75,7 @@ n8n-nodes-pinterest/
 - **`requests/board/`** — contains request builders for Pinterest Board operations.
 - **`requests/media/`** — contains the Media request builders plus the multipart encoder, upload URL validation, and response normalization used by the video upload flow.
 - **`requests/pin/`** — contains request builders for Pinterest Pin operations.
+- **`requests/userAccount/`** — contains request builders for Pinterest User Account operations, including account details, analytics, following relationships, and website verification.
 - **`requests/<resource>/<operation>.ts`** — keeps individual API request builders in separate operation-specific modules, such as `create.ts`, `get.ts`, `list.ts`, and `update.ts`.
 - **Resource `index.ts` files** — explicitly export the request builders belonging to each resource.
 - **`requests/index.ts`** — re-exports the resource-level barrels, providing a single import entry point for request modules.
@@ -152,6 +158,37 @@ The Media resource supports Pinterest's media upload endpoints for video Pins. I
 
 Uploading a video does not create a Pin by itself. Use the returned `media_id` with the Pin resource to create a video Pin. Media uploads use the existing `pins:read` and `pins:write` scopes; no additional credential scopes are required.
 
+### User Account
+
+The User Account resource covers the authenticated Pinterest account: its details, its analytics, its social graph, and the websites it has claimed.
+
+| Operation | Description |
+|---|---|
+| Follow User | Follow another user by username (beta — requires app approval from Pinterest). |
+| Get | Retrieve account information for the authenticated user. |
+| Get Analytics | Retrieve analytics for the authenticated user account. |
+| Get Top Pins Analytics | Retrieve analytics for the authenticated user's top Pins. |
+| Get Top Video Pins Analytics | Retrieve analytics for the authenticated user's top video Pins. |
+| Get Website Verification Code | Retrieve the verification code used to claim a website. |
+| Get Websites | List websites associated with the authenticated user, claimed or not. |
+| List Followers | List the users who follow the authenticated user. |
+| List Following | List the users the authenticated user follows. |
+| List Following Boards | List the boards the authenticated user follows. |
+| List Following Interests | List the interests the authenticated user follows. |
+| List Linked Businesses | List the business accounts linked to the authenticated user. |
+| Unverify Website | Remove verification from one of the authenticated user's websites. |
+| Verify Website | Verify a website as the signed-in user. |
+
+**Get Analytics** and **Get Top Pins Analytics** accept a **Start Date** and **End Date** in `YYYY-MM-DD` format. The start date cannot be more than 90 days before today, and the end date must be on or after the start date. **Get Top Pins Analytics** and **Get Top Video Pins Analytics** additionally require a **Sort By** value, and both accept a **Number of Pins** between 1 and 50 and a **Created in Last 30 Days Only** option, which Pinterest only accepts as the value 30. The user account analytics endpoints expose their own filter set — **From Claimed Content**, **Pin Format**, **App Types**, **Content Type**, **Source**, **Metric Types**, and **Split Field** — which differs from the Pin analytics filters. The **Split Field** options for user account analytics are `No Split`, `App Type`, `Owned Content`, `Pin Format`, and `Source`.
+
+**Verify Website** requires a website and a **Verification Method** (`FILENAME`, `METATAG`, or `DNSTXT`). **Unverify Website** removes verification for a given website and succeeds whether Pinterest answers with an empty body or a status payload.
+
+**Follow User**, **List Following Interests**, and any other operation taking a **Username** reject values made up entirely of digits, because Pinterest usernames are never numeric. **List Following** and **List Following Interests** additionally accept **Explicit Following Only**, and **List Following** accepts a **Feed Type** filter.
+
+The **List Followers**, **List Following**, **List Following Boards**, **List Following Interests**, and **Get Websites** operations follow Pinterest's pagination bookmarks and support **Return All** and **Limit** (1–250, default 50). **List Linked Businesses** returns Pinterest's raw array response and is not paginated.
+
+### Pagination and identifiers
+
 The **List** operation for Pins supports **Return All** and **Limit**. The board listing operations (List, List Pins, List Board Sections, and List Pins on Board Section) follow Pinterest's pagination bookmarks and return all pages. **List Uploads** follows bookmark pagination and supports **Return All** and **Limit**. Pin, board, board section, and media IDs are numeric identifiers; operations that look up a resource by ID expect digits only.
 
 Operation parameters, filters, pagination behavior, and available analytics metrics vary by endpoint. Refer to the operation descriptions in the n8n editor and the [Pinterest API v5 documentation](https://developers.pinterest.com/docs/api/v5/) for endpoint-specific requirements.
@@ -184,7 +221,7 @@ Create a Pinterest OAuth2 API credential in n8n and supply the values required b
 | Access token URL | `https://api.pinterest.com/v5/oauth/token` |
 | Client ID | The client ID issued for your Pinterest application |
 | Client secret | The client secret issued for your Pinterest application |
-| Scopes | `user_accounts:read`, `boards:read`, `boards:write`, `pins:read`, `pins:write` |
+| Scopes | `user_accounts:read`, `user_accounts:write`, `boards:read`, `boards:write`, `pins:read`, `pins:write` |
 
 Configure the OAuth redirect URL using the callback URL supplied by n8n. Register that URL with your Pinterest application wherever required by Pinterest's developer configuration.
 
@@ -192,7 +229,7 @@ Save the credential and use n8n's authorization flow to connect your Pinterest a
 
 ### Permissions and access
 
-The configured scopes cover the board, Pin, media upload, and product-tag operations used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint. Individual operations may still require specific permissions, resource access, or additional API eligibility.
+The configured scopes cover the board, Pin, media upload, product-tag, and user account operations used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint and the read operations of the User Account resource, while `user_accounts:write` covers the write operations such as website verification and following a user. Individual operations may still require specific permissions, resource access, or additional API eligibility.
 
 Pin analytics availability and supported metrics are subject to Pinterest's API requirements. Application approval status, access restrictions, and Pinterest-side changes can affect whether an operation succeeds.
 
@@ -267,7 +304,7 @@ After installing the node and configuring OAuth2 credentials, you can incorporat
 1. Create a workflow in n8n.
 2. Add the Pinterest node.
 3. Select your Pinterest OAuth2 credential.
-4. Choose the resource you want to work with, such as **Pin**, **Board**, or **Media**.
+4. Choose the resource you want to work with, such as **Pin**, **Board**, **Media**, or **User Account**.
 5. Select the required operation.
 6. Configure its parameters, IDs, filters, and other required fields.
 7. Connect the node to the other nodes in your workflow.
@@ -307,6 +344,20 @@ For general workflow guidance, see the [n8n Try it out documentation](https://do
 - [GitHub repository](https://github.com/sinehypernova-0718/n8n-nodes-pinterest) — source code, issues, and contributions.
 
 ## 📝 Version history
+
+### Unreleased
+
+Adds the User Account resource to the Pinterest integration for n8n.
+
+- Adds the **User Account** resource with 14 operations covering account details, account analytics, the following graph, linked businesses, and website verification.
+- Adds **Get Analytics**, **Get Top Pins Analytics**, and **Get Top Video Pins Analytics**, including the user account filter and metric set, the required **Sort By** for top-pin reports, and date-range validation limited to the last 90 days.
+- Adds **Get Websites**, **Verify Website**, **Unverify Website**, and **Get Website Verification Code** for claiming and verifying websites.
+- Adds **Follow User**, **List Followers**, **List Following**, **List Following Boards**, and **List Following Interests**.
+- Adds bookmark pagination with **Return All** and **Limit** support to the user account list operations, and handles the raw array response of **List Linked Businesses**.
+- Expands the credential scope to include `user_accounts:write`.
+- Documents the User Account operations, their filters and validation rules, and the updated permissions.
+
+This release extends the integration with user account management while preserving the existing resources and operations.
 
 ### `0.1.2`
 
