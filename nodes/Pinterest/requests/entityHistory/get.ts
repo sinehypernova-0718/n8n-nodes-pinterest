@@ -4,19 +4,17 @@ import { NodeOperationError } from 'n8n-workflow';
 // order — from the OpenAPI spec enum
 const ORDER_VALUES = ['ASCENDING', 'DESCENDING'] as const;
 
-// Unix timestamps are integers (seconds) in the OpenAPI spec
-const UNIX_TIMESTAMP_PATTERN = /^\d+$/;
-
-function parseUnixTimestamp(
+// Unix timestamps and user IDs are integers (seconds) in the OpenAPI spec and
+// must stay inside JavaScript's safe integer range to keep their exact value
+function parseSafeInteger(
 	value: unknown,
 	fieldName: string,
 	itemIndex: number,
 	self: IExecuteFunctions,
+	invalidMessage: string,
 ): number {
 	if (typeof value !== 'string' && typeof value !== 'number') {
-		throw new NodeOperationError(self.getNode(), `${fieldName} must be a Unix timestamp`, {
-			itemIndex,
-		});
+		throw new NodeOperationError(self.getNode(), invalidMessage, { itemIndex });
 	}
 
 	const normalized = String(value).trim();
@@ -24,15 +22,35 @@ function parseUnixTimestamp(
 		throw new NodeOperationError(self.getNode(), `${fieldName} is required`, { itemIndex });
 	}
 
-	if (!UNIX_TIMESTAMP_PATTERN.test(normalized)) {
+	if (!/^\d+$/.test(normalized)) {
+		throw new NodeOperationError(self.getNode(), invalidMessage, { itemIndex });
+	}
+
+	const parsed = Number(normalized);
+	if (!Number.isSafeInteger(parsed)) {
 		throw new NodeOperationError(
 			self.getNode(),
-			`${fieldName} must be a Unix timestamp in seconds`,
+			`${fieldName} must be an integer within the safe integer range`,
 			{ itemIndex },
 		);
 	}
 
-	return Number(normalized);
+	return parsed;
+}
+
+function parseUnixTimestamp(
+	value: unknown,
+	fieldName: string,
+	itemIndex: number,
+	self: IExecuteFunctions,
+): number {
+	return parseSafeInteger(
+		value,
+		fieldName,
+		itemIndex,
+		self,
+		`${fieldName} must be a Unix timestamp in seconds`,
+	);
 }
 
 function parseUserIdFilter(
@@ -40,20 +58,13 @@ function parseUserIdFilter(
 	itemIndex: number,
 	self: IExecuteFunctions,
 ): number {
-	if (typeof value !== 'string' && typeof value !== 'number') {
-		throw new NodeOperationError(self.getNode(), 'User ID Filter must be an integer', {
-			itemIndex,
-		});
-	}
-
-	const normalized = String(value).trim();
-	if (!/^\d+$/.test(normalized)) {
-		throw new NodeOperationError(self.getNode(), 'User ID Filter must be an integer', {
-			itemIndex,
-		});
-	}
-
-	return Number(normalized);
+	return parseSafeInteger(
+		value,
+		'User ID Filter',
+		itemIndex,
+		self,
+		'User ID Filter must be an integer',
+	);
 }
 
 function parseCommaSeparatedList(
