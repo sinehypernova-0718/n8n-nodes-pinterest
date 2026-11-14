@@ -1,4 +1,20 @@
 export {
+	getUserAccountRequest,
+	getAnalyticsRequest,
+	getTopPinsAnalyticsRequest,
+	getTopVideoPinsAnalyticsRequest,
+	listLinkedBusinessesRequest,
+	listFollowersRequest,
+	listFollowingRequest,
+	listFollowingBoardsRequest,
+	followUserRequest,
+	getWebsitesRequest,
+	verifyWebsiteRequest,
+	unverifyWebsiteRequest,
+	getWebsiteVerificationCodeRequest,
+	listFollowingInterestsRequest,
+} from './userAccount';
+export {
 	createBoardRequest,
 	createBoardSectionRequest,
 	deleteBoardRequest,

@@ -8,7 +8,7 @@ import type {
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { PINTEREST_API_BASE_URL } from './constants';
-import { boardFields, mediaFields, pinFields } from './descriptions';
+import { boardFields, mediaFields, pinFields, userAccountFields } from './descriptions';
 import { mapPinterestApiError } from './errors';
 import {
 	addProductTagsRequest,
@@ -23,6 +23,20 @@ import {
 	getMultiplePinsRequest,
 	getPinAnalyticsRequest,
 	getPinRequest,
+	getUserAccountRequest,
+	getAnalyticsRequest,
+	getTopPinsAnalyticsRequest,
+	getTopVideoPinsAnalyticsRequest,
+	listLinkedBusinessesRequest,
+	listFollowersRequest,
+	listFollowingRequest,
+	listFollowingBoardsRequest,
+	followUserRequest,
+	getWebsitesRequest,
+	verifyWebsiteRequest,
+	unverifyWebsiteRequest,
+	getWebsiteVerificationCodeRequest,
+	listFollowingInterestsRequest,
 	listBoardPinsRequest,
 	listBoardSectionPinsRequest,
 	listBoardSectionsRequest,
@@ -387,6 +401,330 @@ async function collectBoardSectionsListPages(
 	return collected;
 }
 
+async function collectFollowersPages(
+	this: IExecuteFunctions,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
+	const limit = returnAll
+		? Number.POSITIVE_INFINITY
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
+
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'pinterestOAuth2Api',
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw mapPinterestApiError(error, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		if (collected.length >= limit) {
+			break;
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await listFollowersRequest.call(this, itemIndex, nextBookmark);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return returnAll ? collected : collected.slice(0, limit);
+}
+
+async function collectFollowingPages(
+	this: IExecuteFunctions,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
+	const limit = returnAll
+		? Number.POSITIVE_INFINITY
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
+
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'pinterestOAuth2Api',
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw mapPinterestApiError(error, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		if (collected.length >= limit) {
+			break;
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await listFollowingRequest.call(this, itemIndex, nextBookmark);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return returnAll ? collected : collected.slice(0, limit);
+}
+
+async function collectFollowingBoardsPages(
+	this: IExecuteFunctions,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
+	const limit = returnAll
+		? Number.POSITIVE_INFINITY
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
+
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'pinterestOAuth2Api',
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw mapPinterestApiError(error, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		if (collected.length >= limit) {
+			break;
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await listFollowingBoardsRequest.call(this, itemIndex, nextBookmark);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return returnAll ? collected : collected.slice(0, limit);
+}
+
+async function collectWebsitesPages(
+	this: IExecuteFunctions,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
+	const limit = returnAll
+		? Number.POSITIVE_INFINITY
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
+
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'pinterestOAuth2Api',
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw mapPinterestApiError(error, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		if (collected.length >= limit) {
+			break;
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await getWebsitesRequest.call(this, itemIndex, nextBookmark);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return returnAll ? collected : collected.slice(0, limit);
+}
+
+async function collectFollowingInterestsPages(
+	this: IExecuteFunctions,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
+	const limit = returnAll
+		? Number.POSITIVE_INFINITY
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
+
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'pinterestOAuth2Api',
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw mapPinterestApiError(error, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		if (collected.length >= limit) {
+			break;
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await listFollowingInterestsRequest.call(
+			this,
+			itemIndex,
+			nextBookmark,
+		);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return returnAll ? collected : collected.slice(0, limit);
+}
+
 export class Pinterest implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Pinterest',
@@ -429,12 +767,17 @@ export class Pinterest implements INodeType {
 						name: 'Media',
 						value: 'media',
 					},
+					{
+						name: 'User Account',
+						value: 'userAccount',
+					},
 				],
 				default: 'pin',
 			},
 			...pinFields,
 			...boardFields,
 			...mediaFields,
+			...userAccountFields,
 		],
 	};
 
@@ -555,6 +898,58 @@ export class Pinterest implements INodeType {
 								);
 						}
 						break;
+					case 'userAccount':
+						switch (operation) {
+							case 'get':
+								requestOptions = await getUserAccountRequest.call(this, i);
+								break;
+							case 'getAnalytics':
+								requestOptions = await getAnalyticsRequest.call(this, i);
+								break;
+							case 'getTopPinsAnalytics':
+								requestOptions = await getTopPinsAnalyticsRequest.call(this, i);
+								break;
+							case 'getTopVideoPinsAnalytics':
+								requestOptions = await getTopVideoPinsAnalyticsRequest.call(this, i);
+								break;
+							case 'listLinkedBusinesses':
+								requestOptions = await listLinkedBusinessesRequest.call(this, i);
+								break;
+							case 'listFollowers':
+								requestOptions = await listFollowersRequest.call(this, i);
+								break;
+							case 'listFollowing':
+								requestOptions = await listFollowingRequest.call(this, i);
+								break;
+							case 'listFollowingBoards':
+								requestOptions = await listFollowingBoardsRequest.call(this, i);
+								break;
+							case 'followUser':
+								requestOptions = await followUserRequest.call(this, i);
+								break;
+							case 'getWebsites':
+								requestOptions = await getWebsitesRequest.call(this, i);
+								break;
+							case 'verifyWebsite':
+								requestOptions = await verifyWebsiteRequest.call(this, i);
+								break;
+							case 'unverifyWebsite':
+								requestOptions = await unverifyWebsiteRequest.call(this, i);
+								break;
+							case 'getWebsiteVerificationCode':
+								requestOptions = await getWebsiteVerificationCodeRequest.call(this, i);
+								break;
+							case 'listFollowingInterests':
+								requestOptions = await listFollowingInterestsRequest.call(this, i);
+								break;
+							default:
+								throw new NodeOperationError(
+									this.getNode(),
+									`The User Account operation "${operation}" is not implemented yet`,
+									{ itemIndex: i },
+								);
+						}
+						break;
 					default:
 						throw new NodeOperationError(this.getNode(), `Unsupported resource: ${resource}`, {
 							itemIndex: i,
@@ -582,6 +977,32 @@ export class Pinterest implements INodeType {
 						responseData = await collectBoardSectionPinsListPages.call(this, requestOptions, i);
 					} else if (resource === 'media' && operation === 'list') {
 						responseData = await collectMediaListPages.call(this, requestOptions, i);
+					} else if (resource === 'userAccount' && operation === 'listFollowers') {
+						responseData = await collectFollowersPages.call(this, requestOptions, i);
+					} else if (resource === 'userAccount' && operation === 'listFollowing') {
+						responseData = await collectFollowingPages.call(this, requestOptions, i);
+					} else if (resource === 'userAccount' && operation === 'listFollowingBoards') {
+						responseData = await collectFollowingBoardsPages.call(this, requestOptions, i);
+					} else if (resource === 'userAccount' && operation === 'getWebsites') {
+						responseData = await collectWebsitesPages.call(this, requestOptions, i);
+					} else if (resource === 'userAccount' && operation === 'listFollowingInterests') {
+						responseData = await collectFollowingInterestsPages.call(this, requestOptions, i);
+					} else if (resource === 'userAccount' && operation === 'listLinkedBusinesses') {
+						// listLinkedBusinesses returns a raw array (not {items, bookmark})
+						const options: IHttpRequestOptions = {
+							baseURL: PINTEREST_API_BASE_URL,
+							json: true,
+							...requestOptions,
+						};
+						try {
+							responseData = (await this.helpers.httpRequestWithAuthentication.call(
+								this,
+								'pinterestOAuth2Api',
+								options,
+							)) as IDataObject[];
+						} catch (error) {
+							throw mapPinterestApiError(error, { itemIndex: i });
+						}
 					} else {
 						const options: IHttpRequestOptions = {
 							baseURL: PINTEREST_API_BASE_URL,
@@ -605,6 +1026,11 @@ export class Pinterest implements INodeType {
 
 						if (resource === 'pin' && operation === 'removeProductTags') {
 							responseData = normalizeProductTagRemovalResponse(responseData, this.getNode(), i);
+						}
+
+						// unverifyWebsite may return 204 with no body; treat as success with empty object
+						if (resource === 'userAccount' && operation === 'unverifyWebsite') {
+							responseData = responseData ?? {};
 						}
 					}
 				}
