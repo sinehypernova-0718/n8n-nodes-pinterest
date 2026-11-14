@@ -8,7 +8,7 @@ import type {
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { PINTEREST_API_BASE_URL } from './constants';
-import { boardFields, mediaFields, pinFields, userAccountFields } from './descriptions';
+import { boardFields, entityHistoryFields, mediaFields, pinFields, userAccountFields } from './descriptions';
 import { mapPinterestApiError } from './errors';
 import {
 	addProductTagsRequest,
@@ -37,6 +37,7 @@ import {
 	unverifyWebsiteRequest,
 	getWebsiteVerificationCodeRequest,
 	listFollowingInterestsRequest,
+	getEntityHistoryRequest,
 	listBoardPinsRequest,
 	listBoardSectionPinsRequest,
 	listBoardSectionsRequest,
@@ -725,6 +726,70 @@ async function collectFollowingInterestsPages(
 	return returnAll ? collected : collected.slice(0, limit);
 }
 
+async function collectEntityHistoryPages(
+	this: IExecuteFunctions,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
+	const limit = returnAll
+		? Number.POSITIVE_INFINITY
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
+
+	const collected: IDataObject[] = [];
+	const seenBookmarks = new Set<string>();
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+
+	const initialBookmark = firstPageRequest.qs?.bookmark;
+	if (typeof initialBookmark === 'string' && initialBookmark !== '') {
+		seenBookmarks.add(initialBookmark);
+	}
+
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'pinterestOAuth2Api',
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw mapPinterestApiError(error, { itemIndex });
+		}
+
+		if (Array.isArray(response?.items)) {
+			collected.push(...(response.items as IDataObject[]));
+		}
+
+		if (collected.length >= limit) {
+			break;
+		}
+
+		const nextBookmark = response?.bookmark;
+		if (
+			typeof nextBookmark !== 'string' ||
+			nextBookmark === '' ||
+			seenBookmarks.has(nextBookmark)
+		) {
+			break;
+		}
+		seenBookmarks.add(nextBookmark);
+
+		const nextPageRequest = await getEntityHistoryRequest.call(this, itemIndex, nextBookmark);
+		requestOptions = {
+			baseURL: PINTEREST_API_BASE_URL,
+			json: true,
+			...nextPageRequest,
+		};
+	}
+
+	return returnAll ? collected : collected.slice(0, limit);
+}
+
 export class Pinterest implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Pinterest',
@@ -756,16 +821,20 @@ export class Pinterest implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
-						name: 'Pin',
-						value: 'pin',
-					},
-					{
 						name: 'Board',
 						value: 'board',
 					},
 					{
+						name: 'Entity History',
+						value: 'entityHistory',
+					},
+					{
 						name: 'Media',
 						value: 'media',
+					},
+					{
+						name: 'Pin',
+						value: 'pin',
 					},
 					{
 						name: 'User Account',
@@ -778,6 +847,7 @@ export class Pinterest implements INodeType {
 			...boardFields,
 			...mediaFields,
 			...userAccountFields,
+			...entityHistoryFields,
 		],
 	};
 
@@ -950,6 +1020,19 @@ export class Pinterest implements INodeType {
 								);
 						}
 						break;
+					case 'entityHistory':
+						switch (operation) {
+							case 'get':
+								requestOptions = await getEntityHistoryRequest.call(this, i);
+								break;
+							default:
+								throw new NodeOperationError(
+									this.getNode(),
+									`The Entity History operation "${operation}" is not implemented yet`,
+									{ itemIndex: i },
+								);
+						}
+						break;
 					default:
 						throw new NodeOperationError(this.getNode(), `Unsupported resource: ${resource}`, {
 							itemIndex: i,
@@ -987,6 +1070,8 @@ export class Pinterest implements INodeType {
 						responseData = await collectWebsitesPages.call(this, requestOptions, i);
 					} else if (resource === 'userAccount' && operation === 'listFollowingInterests') {
 						responseData = await collectFollowingInterestsPages.call(this, requestOptions, i);
+					} else if (resource === 'entityHistory' && operation === 'get') {
+						responseData = await collectEntityHistoryPages.call(this, requestOptions, i);
 					} else if (resource === 'userAccount' && operation === 'listLinkedBusinesses') {
 						// listLinkedBusinesses returns a raw array (not {items, bookmark})
 						const options: IHttpRequestOptions = {

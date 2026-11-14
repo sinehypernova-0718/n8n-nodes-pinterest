@@ -40,12 +40,16 @@ n8n-nodes-pinterest/
 │       ├── constants.ts
 │       ├── descriptions/
 │       │   ├── BoardDescriptions.ts
+│       │   ├── EntityHistoryDescriptions.ts
 │       │   ├── MediaDescriptions.ts
 │       │   ├── PinDescriptions.ts
 │       │   ├── UserAccountDescriptions.ts
 │       │   └── index.ts
 │       ├── requests/
 │       │   ├── board/
+│       │   │   ├── <operation>.ts
+│       │   │   └── index.ts
+│       │   ├── entityHistory/
 │       │   │   ├── <operation>.ts
 │       │   │   └── index.ts
 │       │   ├── media/
@@ -73,6 +77,7 @@ n8n-nodes-pinterest/
 - **`constants.ts`** — defines shared Pinterest API configuration, such as the API base URL.
 - **`descriptions/`** — contains resource and operation definitions displayed in the n8n editor. Its `index.ts` explicitly exports the descriptions consumed by the main node.
 - **`requests/board/`** — contains request builders for Pinterest Board operations.
+- **`requests/entityHistory/`** — contains request builders for the Pinterest Entity History operations.
 - **`requests/media/`** — contains the Media request builders plus the multipart encoder, upload URL validation, and response normalization used by the video upload flow.
 - **`requests/pin/`** — contains request builders for Pinterest Pin operations.
 - **`requests/userAccount/`** — contains request builders for Pinterest User Account operations, including account details, analytics, following relationships, and website verification.
@@ -187,6 +192,20 @@ The User Account resource covers the authenticated Pinterest account: its detail
 
 The **List Followers**, **List Following**, **List Following Boards**, **List Following Interests**, and **Get Websites** operations follow Pinterest's pagination bookmarks and support **Return All** and **Limit** (1–250, default 50). **List Linked Businesses** returns Pinterest's raw array response and is not paginated.
 
+### Entity History
+
+The Entity History resource covers Pinterest's ad entity change history endpoint.
+
+| Operation | Description |
+|---|---|
+| Get | Get the change history of ad entities for an ad account. |
+
+**Get** calls `GET /ad_accounts/entity_history`. It requires an **Ad Account ID** (digits only, up to 18 characters), an **Entity ID**, a **Start Time**, and an **End Time**, both Unix timestamps in seconds covering the inclusive range to inspect. The **Order** option is either `Ascending` (`ASCENDING`) or `Descending` (`DESCENDING`) and defaults to ascending (oldest-first). The optional **Entity IDs** and **Field Filters** values accept comma-separated lists, while **Advertiser ID** returns the history of every entity belonging to that advertiser and **User ID Filter** restricts the results to changes initiated by a single user.
+
+The endpoint follows Pinterest's pagination bookmarks and supports **Return All** and **Limit** (1–250, default 50). Each returned item contains the change timestamp, the changed fields with their old and new values, the changed entity, the operation that caused the change, and the user who initiated it.
+
+> **Note:** The endpoint is a closed beta that requires app approval from Pinterest, requires the `ads:read` scope, and is not available in the Pinterest API Sandbox.
+
 ### Pagination and identifiers
 
 The **List** operation for Pins supports **Return All** and **Limit**. The board listing operations (List, List Pins, List Board Sections, and List Pins on Board Section) follow Pinterest's pagination bookmarks and return all pages. **List Uploads** follows bookmark pagination and supports **Return All** and **Limit**. Pin, board, board section, and media IDs are numeric identifiers; operations that look up a resource by ID expect digits only.
@@ -223,13 +242,15 @@ Create a Pinterest OAuth2 API credential in n8n and supply the values required b
 | Client secret | The client secret issued for your Pinterest application |
 | Scopes | `user_accounts:read`, `user_accounts:write`, `boards:read`, `boards:write`, `pins:read`, `pins:write` |
 
+The Entity History resource is the only operation that needs the additional `ads:read` scope. Add `ads:read` to the scope list of the credential — and request that scope for your Pinterest application — before using it.
+
 Configure the OAuth redirect URL using the callback URL supplied by n8n. Register that URL with your Pinterest application wherever required by Pinterest's developer configuration.
 
 Save the credential and use n8n's authorization flow to connect your Pinterest account. Once authorization succeeds, select the credential in the Pinterest node.
 
 ### Permissions and access
 
-The configured scopes cover the board, Pin, media upload, product-tag, and user account operations used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint and the read operations of the User Account resource, while `user_accounts:write` covers the write operations such as website verification and following a user. Individual operations may still require specific permissions, resource access, or additional API eligibility.
+The configured scopes cover the board, Pin, media upload, product-tag, and user account operations used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint and the read operations of the User Account resource, while `user_accounts:write` covers the write operations such as website verification and following a user. The Entity History operation is authorized with the `ads:read` scope, which is not requested by the default credential scope list, so it has to be added explicitly. Individual operations may still require specific permissions, resource access, or additional API eligibility.
 
 Pin analytics availability and supported metrics are subject to Pinterest's API requirements. Application approval status, access restrictions, and Pinterest-side changes can affect whether an operation succeeds.
 
