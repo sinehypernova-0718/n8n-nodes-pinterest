@@ -26,13 +26,16 @@ const SPLIT_FIELD_VALUES = ['NO_SPLIT', 'APP_TYPE'];
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-function parseUtcDate(value: string, fieldName: string, itemIndex: number, self: IExecuteFunctions): number {
+function parseUtcDate(
+	value: string,
+	fieldName: string,
+	itemIndex: number,
+	self: IExecuteFunctions,
+): number {
 	if (!DATE_PATTERN.test(value)) {
-		throw new NodeOperationError(
-			self.getNode(),
-			`${fieldName} must be in YYYY-MM-DD format`,
-			{ itemIndex },
-		);
+		throw new NodeOperationError(self.getNode(), `${fieldName} must be in YYYY-MM-DD format`, {
+			itemIndex,
+		});
 	}
 
 	const timestamp = Date.parse(`${value}T00:00:00.000Z`);
@@ -79,11 +82,9 @@ export async function getPinAnalyticsRequest(
 	const endTimestamp = parseUtcDate(endDate, 'End Date', itemIndex, this);
 
 	if (endTimestamp < startTimestamp) {
-		throw new NodeOperationError(
-			this.getNode(),
-			'End Date must be on or after Start Date',
-			{ itemIndex },
-		);
+		throw new NodeOperationError(this.getNode(), 'End Date must be on or after Start Date', {
+			itemIndex,
+		});
 	}
 	if (endTimestamp - startTimestamp > 90 * DAY_IN_MS) {
 		throw new NodeOperationError(

@@ -20,11 +20,9 @@ export async function listMediaRequest(
 	} else {
 		const limit = this.getNodeParameter('limit', itemIndex, 50);
 		if (typeof limit !== 'number' || !Number.isInteger(limit) || limit < 1 || limit > 250) {
-			throw new NodeOperationError(
-				this.getNode(),
-				'Limit must be an integer between 1 and 250',
-				{ itemIndex },
-			);
+			throw new NodeOperationError(this.getNode(), 'Limit must be an integer between 1 and 250', {
+				itemIndex,
+			});
 		}
 		qs.page_size = limit;
 	}

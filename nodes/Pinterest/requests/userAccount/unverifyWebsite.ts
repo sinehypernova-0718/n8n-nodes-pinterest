@@ -7,11 +7,9 @@ export async function unverifyWebsiteRequest(
 ): Promise<IHttpRequestOptions> {
 	const website = (this.getNodeParameter('website', itemIndex, '') as string).trim();
 	if (!website) {
-		throw new NodeOperationError(
-			this.getNode(),
-			'Website is required to unverify a website',
-			{ itemIndex },
-		);
+		throw new NodeOperationError(this.getNode(), 'Website is required to unverify a website', {
+			itemIndex,
+		});
 	}
 
 	return {
