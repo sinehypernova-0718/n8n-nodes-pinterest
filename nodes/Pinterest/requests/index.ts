@@ -1,3 +1,4 @@
+export { getEntityHistoryRequest } from './entityHistory';
 export {
 	getUserAccountRequest,
 	getAnalyticsRequest,
