@@ -250,7 +250,7 @@ Save the credential and use n8n's authorization flow to connect your Pinterest a
 
 ### Permissions and access
 
-The configured scopes cover the board, Pin, media upload, product-tag, and user account operations used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint and the read operations of the User Account resource, while `user_accounts:write` covers the write operations such as website verification and following a user. The Entity History operation is authorized with the `ads:read` scope, which is not requested by the default credential scope list, so it has to be added explicitly. Individual operations may still require specific permissions, resource access, or additional API eligibility.
+The configured scopes cover the board, Pin, media upload, product-tag, and user account operations used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint and the read operations of the User Account resource, while `user_accounts:write` covers the write operations such as website verification and following a user. The Entity History operation is authorized with the `ads:read` scope explicitly.
 
 Pin analytics availability and supported metrics are subject to Pinterest's API requirements. Application approval status, access restrictions, and Pinterest-side changes can affect whether an operation succeeds.
 
