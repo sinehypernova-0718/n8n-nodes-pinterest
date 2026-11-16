@@ -52,7 +52,8 @@ export const entityHistoryFields: INodeProperties[] = [
 				operation: ['get'],
 			},
 		},
-		description: 'ID of the entity for which change history will be fetched',
+		description:
+			'ID of the entity for which change history will be fetched. Pinterest requires this parameter on every request, including requests that also pass an Advertiser ID.',
 	},
 	{
 		displayName: 'Start Time',
@@ -151,7 +152,7 @@ export const entityHistoryFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description:
-					'Optional Advertiser ID. When provided, returns history for all entities belonging to this advertiser.',
+					'Optional Advertiser ID. When provided, returns history for all entities belonging to this advertiser. It does not replace the Entity ID, which Pinterest always requires.',
 			},
 			{
 				displayName: 'Bookmark',

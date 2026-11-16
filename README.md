@@ -201,6 +201,8 @@ The Entity History resource covers Pinterest's ad entity change history endpoint
 
 **Get** calls `GET /ad_accounts/entity_history`. It requires an **Ad Account ID** (digits only, up to 18 characters), an **Entity ID**, a **Start Time**, and an **End Time**, both Unix timestamps in seconds covering the inclusive range to inspect. The **Order** option is either `Ascending` (`ASCENDING`) or `Descending` (`DESCENDING`) and defaults to ascending (oldest-first). The optional **Entity IDs** and **Field Filters** values accept comma-separated lists, while **Advertiser ID** returns the history of every entity belonging to that advertiser and **User ID Filter** restricts the results to changes initiated by a single user.
 
+Pinterest marks `entity_id` as a required parameter of the endpoint, so an **Entity ID** is always sent. **Advertiser ID** is an independent, optional parameter that widens the result set to every entity of that advertiser — it does not replace the **Entity ID**, and there is no advertiser-only request mode.
+
 The endpoint follows Pinterest's pagination bookmarks and supports **Return All** and **Limit** (1–250, default 50). Each returned item contains the change timestamp, the changed fields with their old and new values, the changed entity, the operation that caused the change, and the user who initiated it.
 
 > **Note:** The endpoint is a closed beta that requires app approval from Pinterest, requires the `ads:read` scope, and is not available in the Pinterest API Sandbox.
@@ -241,7 +243,7 @@ Create a Pinterest OAuth2 API credential in n8n and supply the values required b
 | Client secret     | The client secret issued for your Pinterest application                                               |
 | Scopes            | `user_accounts:read`, `user_accounts:write`, `boards:read`, `boards:write`, `pins:read`, `pins:write` |
 
-The Entity History resource is the only operation that needs the additional `ads:read` scope. Add `ads:read` to the scope list of the credential — and request that scope for your Pinterest application — before using it.
+The Entity History resource is the only operation that needs the `ads:read` scope, which the credential requests by default. Make sure the scope is also granted to your Pinterest application before using it.
 
 Configure the OAuth redirect URL using the callback URL supplied by n8n. Register that URL with your Pinterest application wherever required by Pinterest's developer configuration.
 

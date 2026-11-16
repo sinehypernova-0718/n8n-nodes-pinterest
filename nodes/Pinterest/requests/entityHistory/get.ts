@@ -117,6 +117,11 @@ export async function getEntityHistoryRequest(
 		);
 	}
 
+	// entity_id is a required query parameter in the OpenAPI definition of
+	// GET /ad_accounts/entity_history. advertiser_id is an independent,
+	// optional filter that widens the result set to every entity of that
+	// advertiser; it does not replace entity_id, so the entity id stays
+	// mandatory here.
 	const entityId = (this.getNodeParameter('entity_id', itemIndex, '') as string).trim();
 	if (!entityId) {
 		throw new NodeOperationError(this.getNode(), 'Entity ID is required', { itemIndex });
