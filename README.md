@@ -26,6 +26,7 @@
 - **Pin analytics** — retrieve supported analytics metrics over specified date ranges.
 - **Media uploads** — register, transfer, and track video uploads for video Pins, with optional processing polling.
 - **User account management** — retrieve account details and analytics, manage following relationships, and claim or verify websites.
+- **Ad entity history** — inspect the change history of ad entities for an ad account.
 - **Pagination support** — retrieve paginated results where supported by the relevant operation.
 
 ## 📁 Repository Structure
@@ -326,7 +327,7 @@ After installing the node and configuring OAuth2 credentials, you can incorporat
 1. Create a workflow in n8n.
 2. Add the Pinterest node.
 3. Select your Pinterest OAuth2 credential.
-4. Choose the resource you want to work with, such as **Pin**, **Board**, **Media**, or **User Account**.
+4. Choose the resource you want to work with, such as **Pin**, **Board**, **Media**, **User Account**, or **Entity History**.
 5. Select the required operation.
 6. Configure its parameters, IDs, filters, and other required fields.
 7. Connect the node to the other nodes in your workflow.
@@ -367,19 +368,22 @@ For general workflow guidance, see the [n8n Try it out documentation](https://do
 
 ## 📝 Version history
 
-### Unreleased
+### `0.2.0`
 
-Adds the User Account resource to the Pinterest integration for n8n.
+Adds the User Account and Entity History resources to the Pinterest integration for n8n.
 
 - Adds the **User Account** resource with 14 operations covering account details, account analytics, the following graph, linked businesses, and website verification.
 - Adds **Get Analytics**, **Get Top Pins Analytics**, and **Get Top Video Pins Analytics**, including the user account filter and metric set, the required **Sort By** for top-pin reports, and date-range validation limited to the last 90 days.
 - Adds **Get Websites**, **Verify Website**, **Unverify Website**, and **Get Website Verification Code** for claiming and verifying websites.
 - Adds **Follow User**, **List Followers**, **List Following**, **List Following Boards**, and **List Following Interests**.
 - Adds bookmark pagination with **Return All** and **Limit** support to the user account list operations, and handles the raw array response of **List Linked Businesses**.
-- Expands the credential scope to include `user_accounts:write`.
-- Documents the User Account operations, their filters and validation rules, and the updated permissions.
+- Adds the **Entity History** resource with a **Get** operation that reads the change history of ad entities for an ad account.
+- Supports the required **Ad Account ID**, **Entity ID**, **Start Time**, and **End Time** parameters, plus the optional **Advertiser ID**, **Entity IDs**, **Field Filters**, and **User ID Filter** values, and the ascending or descending **Order** option.
+- Validates the ad account ID, the Unix timestamps, and the numeric filter values locally, including the safe integer range.
+- Expands the credential scope to include `user_accounts:write` and `ads:read`.
+- Documents the User Account and Entity History operations, their filters and validation rules, and the updated permissions.
 
-This release extends the integration with user account management while preserving the existing resources and operations.
+This release extends the integration with user account management and ad entity change history while preserving the existing resources and operations.
 
 ### `0.1.2`
 
