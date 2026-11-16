@@ -28,7 +28,6 @@
 - **User account management** — retrieve account details and analytics, manage following relationships, and claim or verify websites.
 - **Pagination support** — retrieve paginated results where supported by the relevant operation.
 
-
 ## 📁 Repository Structure
 
 ```text
@@ -115,19 +114,19 @@ The Pinterest node exposes supported Pinterest API operations through n8n's reso
 
 The Pin resource supports operations for managing Pins and retrieving their associated information.
 
-| Operation | Description |
-|---|---|
-| Add Product Tags | Add product Pins as tags to a hero Pin. |
-| Create | Create a Pin using the supported Pinterest API parameters. |
-| Get | Retrieve an individual Pin by its ID. |
+| Operation                  | Description                                                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Add Product Tags           | Add product Pins as tags to a hero Pin.                                                                        |
+| Create                     | Create a Pin using the supported Pinterest API parameters.                                                     |
+| Get                        | Retrieve an individual Pin by its ID.                                                                          |
 | Get Multiple Pin Analytics | Retrieve analytics for multiple Pins in a batch request, using the supported analytics metrics and date range. |
-| List | List Pins with supported filters and pagination. |
-| List Product Tags | List the product-tag associations on a hero Pin. |
-| Update | Update supported fields of an existing Pin. |
-| Delete | Delete a Pin by its ID. |
-| Remove Product Tags | Remove product-tag associations from a hero Pin without deleting Pins or products. |
-| Save | Save a Pin to a board. |
-| Get Analytics | Retrieve analytics for a Pin using supported metrics and date parameters. |
+| List                       | List Pins with supported filters and pagination.                                                               |
+| List Product Tags          | List the product-tag associations on a hero Pin.                                                               |
+| Update                     | Update supported fields of an existing Pin.                                                                    |
+| Delete                     | Delete a Pin by its ID.                                                                                        |
+| Remove Product Tags        | Remove product-tag associations from a hero Pin without deleting Pins or products.                             |
+| Save                       | Save a Pin to a board.                                                                                         |
+| Get Analytics              | Retrieve analytics for a Pin using supported metrics and date parameters.                                      |
 
 **Product tags** attach product Pins to a hero Pin. **Add Product Tags** and **Remove Product Tags** each accept a hero Pin ID and a comma-separated list of 1–24 product Pin IDs per request. These inputs are Pin IDs, not catalog item IDs. For Add Product Tags, Pinterest rejects duplicate `pin_id` values and applies eligibility checks; if any product Pin is ineligible, the entire request fails (all-or-nothing). Adding a Pin that is already tagged is a no-op success. **List Product Tags** returns the Pin IDs currently tagged to the hero Pin, or an empty array if there are none, and is not paginated. **Remove Product Tags** removes only the tag associations and returns HTTP 204 with no response body on success. Removing a tag that is not present is a no-op success. It does not delete the hero Pin, the product Pins, or any catalog products.
 
@@ -135,28 +134,28 @@ Pinterest documents these `IneligibleProductTagReason` values for Add Product Ta
 
 ### Board
 
-| Operation | Description |
-|---|---|
-| Create | Create a new board. |
-| Create Board Section | Create a new board section. |
-| Delete | Delete a single board. |
-| Delete Board Section | Delete a single board section. |
-| Get | Get a single board. |
-| List | List boards. |
-| List Board Sections | List sections of a board. |
-| List Pins | List Pins on a board. |
-| List Pins on Board Section | List Pins on a board section. |
-| Update | Update a single board. |
-| Update Board Section | Update a single board section. |
+| Operation                  | Description                    |
+| -------------------------- | ------------------------------ |
+| Create                     | Create a new board.            |
+| Create Board Section       | Create a new board section.    |
+| Delete                     | Delete a single board.         |
+| Delete Board Section       | Delete a single board section. |
+| Get                        | Get a single board.            |
+| List                       | List boards.                   |
+| List Board Sections        | List sections of a board.      |
+| List Pins                  | List Pins on a board.          |
+| List Pins on Board Section | List Pins on a board section.  |
+| Update                     | Update a single board.         |
+| Update Board Section       | Update a single board section. |
 
 ### Media
 
 The Media resource supports Pinterest's media upload endpoints for video Pins. Image uploads and Media Library operations are not implemented.
 
-| Operation | Description |
-|---|---|
-| Get Upload | Retrieve the status of a media upload by its numeric media ID. |
-| List Uploads | List media uploads with bookmark pagination. |
+| Operation    | Description                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------------------------- |
+| Get Upload   | Retrieve the status of a media upload by its numeric media ID.                                             |
+| List Uploads | List media uploads with bookmark pagination.                                                               |
 | Upload Video | Register a video upload, transfer the file to Pinterest media storage, and optionally wait for processing. |
 
 **Upload Video** reads a video from an n8n binary property and supports MP4, M4V, and MOV files up to 512 MB. The node registers the upload, sends the file directly to Pinterest's media storage, and then checks the upload status. When **Wait for Processing** is enabled, the node polls Pinterest until the video finishes processing, fails, or the configured timeout is reached. The upload URL and temporary upload credentials returned by Pinterest are never included in node output or error messages.
@@ -167,22 +166,22 @@ Uploading a video does not create a Pin by itself. Use the returned `media_id` w
 
 The User Account resource covers the authenticated Pinterest account: its details, its analytics, its social graph, and the websites it has claimed.
 
-| Operation | Description |
-|---|---|
-| Follow User | Follow another user by username (beta — requires app approval from Pinterest). |
-| Get | Retrieve account information for the authenticated user. |
-| Get Analytics | Retrieve analytics for the authenticated user account. |
-| Get Top Pins Analytics | Retrieve analytics for the authenticated user's top Pins. |
-| Get Top Video Pins Analytics | Retrieve analytics for the authenticated user's top video Pins. |
-| Get Website Verification Code | Retrieve the verification code used to claim a website. |
-| Get Websites | List websites associated with the authenticated user, claimed or not. |
-| List Followers | List the users who follow the authenticated user. |
-| List Following | List the users the authenticated user follows. |
-| List Following Boards | List the boards the authenticated user follows. |
-| List Following Interests | List the interests the authenticated user follows. |
-| List Linked Businesses | List the business accounts linked to the authenticated user. |
-| Unverify Website | Remove verification from one of the authenticated user's websites. |
-| Verify Website | Verify a website as the signed-in user. |
+| Operation                     | Description                                                                    |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| Follow User                   | Follow another user by username (beta — requires app approval from Pinterest). |
+| Get                           | Retrieve account information for the authenticated user.                       |
+| Get Analytics                 | Retrieve analytics for the authenticated user account.                         |
+| Get Top Pins Analytics        | Retrieve analytics for the authenticated user's top Pins.                      |
+| Get Top Video Pins Analytics  | Retrieve analytics for the authenticated user's top video Pins.                |
+| Get Website Verification Code | Retrieve the verification code used to claim a website.                        |
+| Get Websites                  | List websites associated with the authenticated user, claimed or not.          |
+| List Followers                | List the users who follow the authenticated user.                              |
+| List Following                | List the users the authenticated user follows.                                 |
+| List Following Boards         | List the boards the authenticated user follows.                                |
+| List Following Interests      | List the interests the authenticated user follows.                             |
+| List Linked Businesses        | List the business accounts linked to the authenticated user.                   |
+| Unverify Website              | Remove verification from one of the authenticated user's websites.             |
+| Verify Website                | Verify a website as the signed-in user.                                        |
 
 **Get Analytics** and **Get Top Pins Analytics** accept a **Start Date** and **End Date** in `YYYY-MM-DD` format. The start date cannot be more than 90 days before today, and the end date must be on or after the start date. **Get Top Pins Analytics** and **Get Top Video Pins Analytics** additionally require a **Sort By** value, and both accept a **Number of Pins** between 1 and 50 and a **Created in Last 30 Days Only** option, which Pinterest only accepts as the value 30. The user account analytics endpoints expose their own filter set — **From Claimed Content**, **Pin Format**, **App Types**, **Content Type**, **Source**, **Metric Types**, and **Split Field** — which differs from the Pin analytics filters. The **Split Field** options for user account analytics are `No Split`, `App Type`, `Owned Content`, `Pin Format`, and `Source`.
 
@@ -196,9 +195,9 @@ The **List Followers**, **List Following**, **List Following Boards**, **List Fo
 
 The Entity History resource covers Pinterest's ad entity change history endpoint.
 
-| Operation | Description |
-|---|---|
-| Get | Get the change history of ad entities for an ad account. |
+| Operation | Description                                              |
+| --------- | -------------------------------------------------------- |
+| Get       | Get the change history of ad entities for an ad account. |
 
 **Get** calls `GET /ad_accounts/entity_history`. It requires an **Ad Account ID** (digits only, up to 18 characters), an **Entity ID**, a **Start Time**, and an **End Time**, both Unix timestamps in seconds covering the inclusive range to inspect. The **Order** option is either `Ascending` (`ASCENDING`) or `Descending` (`DESCENDING`) and defaults to ascending (oldest-first). The optional **Entity IDs** and **Field Filters** values accept comma-separated lists, while **Advertiser ID** returns the history of every entity belonging to that advertiser and **User ID Filter** restricts the results to changes initiated by a single user.
 
@@ -233,14 +232,14 @@ Pinterest controls application access and approval. Registering a developer appl
 
 Create a Pinterest OAuth2 API credential in n8n and supply the values required by the credential configuration.
 
-| Setting | Value |
-|---|---|
-| Grant type | Authorization Code |
-| Authorization URL | `https://www.pinterest.com/oauth/` |
-| Access token URL | `https://api.pinterest.com/v5/oauth/token` |
-| Client ID | The client ID issued for your Pinterest application |
-| Client secret | The client secret issued for your Pinterest application |
-| Scopes | `user_accounts:read`, `user_accounts:write`, `boards:read`, `boards:write`, `pins:read`, `pins:write` |
+| Setting           | Value                                                                                                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| Grant type        | Authorization Code                                                                                    |
+| Authorization URL | `https://www.pinterest.com/oauth/`                                                                    |
+| Access token URL  | `https://api.pinterest.com/v5/oauth/token`                                                            |
+| Client ID         | The client ID issued for your Pinterest application                                                   |
+| Client secret     | The client secret issued for your Pinterest application                                               |
+| Scopes            | `user_accounts:read`, `user_accounts:write`, `boards:read`, `boards:write`, `pins:read`, `pins:write` |
 
 The Entity History resource is the only operation that needs the additional `ads:read` scope. Add `ads:read` to the scope list of the credential — and request that scope for your Pinterest application — before using it.
 
@@ -288,15 +287,15 @@ pnpm install
 
 ### Available scripts
 
-| Script | Description |
-| --- | --- |
-| `pnpm run dev` | Start n8n with the Pinterest node and watch for changes. |
-| `pnpm run build` | Compile TypeScript to JavaScript for production. |
-| `pnpm run build:watch` | Build in watch mode. |
-| `pnpm run lint` | Check code for errors and style issues. |
-| `pnpm run lint:fix` | Automatically fix lint issues where possible. |
+| Script                   | Description                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `pnpm run dev`           | Start n8n with the Pinterest node and watch for changes.                                          |
+| `pnpm run build`         | Compile TypeScript to JavaScript for production.                                                  |
+| `pnpm run build:watch`   | Build in watch mode.                                                                              |
+| `pnpm run lint`          | Check code for errors and style issues.                                                           |
+| `pnpm run lint:fix`      | Automatically fix lint issues where possible.                                                     |
 | `pnpm run release:local` | Create a local release: bump the version, update the changelog, commit, tag (`vX.Y.Z`), and push. |
-| `pnpm run release` | The GitHub Actions publish entry point; builds and publishes to npm with provenance. |
+| `pnpm run release`       | The GitHub Actions publish entry point; builds and publishes to npm with provenance.              |
 
 > **Note:** Use `pnpm run release:local` to create and push a release tag. The repository's `.release-it.json` configures the `master` branch, the `vX.Y.Z` tag format, and changelog generation.
 
@@ -416,7 +415,6 @@ Initial pre-1.0 release of the Pinterest integration for n8n.
 - Includes pagination and operation-specific request handling where implemented.
 
 This release establishes the initial integration structure, with further Pinterest resources and operations available for future development.
-
 
 ## 📄 License
 

@@ -8,7 +8,13 @@ import type {
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { PINTEREST_API_BASE_URL } from './constants';
-import { boardFields, entityHistoryFields, mediaFields, pinFields, userAccountFields } from './descriptions';
+import {
+	boardFields,
+	entityHistoryFields,
+	mediaFields,
+	pinFields,
+	userAccountFields,
+} from './descriptions';
 import { mapPinterestApiError } from './errors';
 import {
 	addProductTagsRequest,
@@ -711,11 +717,7 @@ async function collectFollowingInterestsPages(
 		}
 		seenBookmarks.add(nextBookmark);
 
-		const nextPageRequest = await listFollowingInterestsRequest.call(
-			this,
-			itemIndex,
-			nextBookmark,
-		);
+		const nextPageRequest = await listFollowingInterestsRequest.call(this, itemIndex, nextBookmark);
 		requestOptions = {
 			baseURL: PINTEREST_API_BASE_URL,
 			json: true,
