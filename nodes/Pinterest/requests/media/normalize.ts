@@ -58,11 +58,9 @@ export function normalizeMediaUpload(
 
 	const status = value.status;
 	if (status !== undefined && (typeof status !== 'string' || !MEDIA_STATUS_VALUES.has(status))) {
-		throw new NodeOperationError(
-			node,
-			'Pinterest returned an unrecognized media upload status',
-			{ itemIndex },
-		);
+		throw new NodeOperationError(node, 'Pinterest returned an unrecognized media upload status', {
+			itemIndex,
+		});
 	}
 	if (options.requireStatus === true && typeof status !== 'string') {
 		throw new NodeOperationError(
@@ -89,11 +87,9 @@ export function normalizeMediaUploadList(
 	itemIndex: number,
 ): IDataObject[] {
 	if (!isDataObject(value) || !Array.isArray(value.items)) {
-		throw new NodeOperationError(
-			node,
-			'Pinterest returned an invalid media upload list response',
-			{ itemIndex },
-		);
+		throw new NodeOperationError(node, 'Pinterest returned an invalid media upload list response', {
+			itemIndex,
+		});
 	}
 
 	return value.items.map((item) => normalizeMediaUpload(item, node, itemIndex));

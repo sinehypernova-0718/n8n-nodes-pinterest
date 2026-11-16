@@ -1,13 +1,7 @@
 import type { IDataObject, IExecuteFunctions, IHttpRequestOptions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-const PRIVACY_FILTER_VALUES = [
-  'ALL',
-  'PUBLIC',
-  'PROTECTED',
-  'SECRET',
-  'PUBLIC_AND_SECRET'
-];
+const PRIVACY_FILTER_VALUES = ['ALL', 'PUBLIC', 'PROTECTED', 'SECRET', 'PUBLIC_AND_SECRET'];
 
 export async function listBoardsRequest(
 	this: IExecuteFunctions,

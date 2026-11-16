@@ -32,11 +32,9 @@ function parseCarouselSlots(
 		try {
 			parsed = JSON.parse(trimmed);
 		} catch {
-			throw new NodeOperationError(
-				self.getNode(),
-				'Carousel Slots must be valid JSON',
-				{ itemIndex },
-			);
+			throw new NodeOperationError(self.getNode(), 'Carousel Slots must be valid JSON', {
+				itemIndex,
+			});
 		}
 	}
 
@@ -48,20 +46,16 @@ function parseCarouselSlots(
 
 	for (const slot of parsed) {
 		if (typeof slot !== 'object' || slot === null || Array.isArray(slot)) {
-			throw new NodeOperationError(
-				self.getNode(),
-				'Each Carousel Slot must be a JSON object',
-				{ itemIndex },
-			);
+			throw new NodeOperationError(self.getNode(), 'Each Carousel Slot must be a JSON object', {
+				itemIndex,
+			});
 		}
 		for (const field of CAROUSEL_SLOT_FIELDS) {
 			const fieldValue = (slot as IDataObject)[field];
 			if (fieldValue !== undefined && typeof fieldValue !== 'string') {
-				throw new NodeOperationError(
-					self.getNode(),
-					`Carousel Slot "${field}" must be a string`,
-					{ itemIndex },
-				);
+				throw new NodeOperationError(self.getNode(), `Carousel Slot "${field}" must be a string`, {
+					itemIndex,
+				});
 			}
 		}
 	}
@@ -111,11 +105,9 @@ export async function updatePinRequest(
 			continue;
 		}
 		if (typeof value !== 'string' || !/^\d+$/.test(value)) {
-			throw new NodeOperationError(
-				this.getNode(),
-				`${label} must contain only digits`,
-				{ itemIndex },
-			);
+			throw new NodeOperationError(this.getNode(), `${label} must contain only digits`, {
+				itemIndex,
+			});
 		}
 		body[field] = value;
 	}
@@ -133,11 +125,9 @@ export async function updatePinRequest(
 		}
 		body.ai_disclosures = { values: aiDisclosures };
 	} else if (aiDisclosures !== undefined && !Array.isArray(aiDisclosures)) {
-		throw new NodeOperationError(
-			this.getNode(),
-			'AI Disclosure Values must be a list of values',
-			{ itemIndex },
-		);
+		throw new NodeOperationError(this.getNode(), 'AI Disclosure Values must be a list of values', {
+			itemIndex,
+		});
 	}
 
 	const carouselSlots = additionalFields.carousel_slots;
@@ -149,11 +139,9 @@ export async function updatePinRequest(
 	}
 
 	if (Object.keys(body).length === 0) {
-		throw new NodeOperationError(
-			this.getNode(),
-			'At least one field is required to update a Pin',
-			{ itemIndex },
-		);
+		throw new NodeOperationError(this.getNode(), 'At least one field is required to update a Pin', {
+			itemIndex,
+		});
 	}
 
 	const requestOptions: IHttpRequestOptions = {

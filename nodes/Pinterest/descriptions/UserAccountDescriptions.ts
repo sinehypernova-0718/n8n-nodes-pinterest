@@ -15,8 +15,7 @@ export const userAccountFields: INodeProperties[] = [
 			{
 				name: 'Follow User',
 				value: 'followUser',
-				description:
-					'Follow another user (beta — requires app approval from Pinterest)',
+				description: 'Follow another user (beta — requires app approval from Pinterest)',
 				action: 'Follow a user',
 			},
 			{
@@ -386,8 +385,7 @@ export const userAccountFields: INodeProperties[] = [
 				name: 'created_in_last_n_days',
 				type: 'boolean',
 				default: false,
-				description:
-					'Whether to filter results to only pins created in the last 30 days',
+				description: 'Whether to filter results to only pins created in the last 30 days',
 			},
 			{
 				displayName: 'From Claimed Content',
@@ -568,8 +566,7 @@ export const userAccountFields: INodeProperties[] = [
 				name: 'created_in_last_n_days',
 				type: 'boolean',
 				default: false,
-				description:
-					'Whether to filter results to only pins created in the last 30 days',
+				description: 'Whether to filter results to only pins created in the last 30 days',
 			},
 			{
 				displayName: 'From Claimed Content',
@@ -1008,7 +1005,7 @@ export const userAccountFields: INodeProperties[] = [
 				operation: ['listFollowingInterests'],
 			},
 		},
-		description: "Pinterest username whose followed interests to retrieve",
+		description: 'Pinterest username whose followed interests to retrieve',
 	},
 	{
 		displayName: 'Return All',

@@ -31,7 +31,13 @@ const METRIC_TYPES_VALUES = [
 	'SAVE_RATE',
 ] as const;
 // split_field for user account analytics — 5 values, different from pin analytics
-const SPLIT_FIELD_VALUES = ['NO_SPLIT', 'APP_TYPE', 'OWNED_CONTENT', 'SOURCE', 'PIN_FORMAT'] as const;
+const SPLIT_FIELD_VALUES = [
+	'NO_SPLIT',
+	'APP_TYPE',
+	'OWNED_CONTENT',
+	'SOURCE',
+	'PIN_FORMAT',
+] as const;
 
 function parseAndValidateDate(
 	value: string,
@@ -199,11 +205,7 @@ export async function getAnalyticsRequest(
 		qs.split_field = splitField;
 	}
 
-	const adAccountId = validateAdAccountId(
-		additionalFields.ad_account_id ?? '',
-		itemIndex,
-		this,
-	);
+	const adAccountId = validateAdAccountId(additionalFields.ad_account_id ?? '', itemIndex, this);
 	if (adAccountId !== '') {
 		qs.ad_account_id = adAccountId;
 	}

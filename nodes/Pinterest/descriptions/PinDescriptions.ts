@@ -468,9 +468,7 @@ export const pinFields: INodeProperties[] = [
 				displayName: 'Pin Type',
 				name: 'pin_type',
 				type: 'options',
-				options: [
-					{ name: 'Private', value: 'PRIVATE' },
-				],
+				options: [{ name: 'Private', value: 'PRIVATE' }],
 				default: 'PRIVATE',
 				description: 'Filter by Pin type; currently supports private Pins',
 			},
@@ -652,7 +650,7 @@ export const pinFields: INodeProperties[] = [
 			},
 		],
 	},
-	
+
 	// ----------------------------------
 	//          pin:update
 	// ----------------------------------
@@ -767,7 +765,7 @@ export const pinFields: INodeProperties[] = [
 		},
 		description: 'Optional numeric ad account ID (maximum 18 digits)',
 	},
-	
+
 	// ----------------------------------
 	//          pin:delete
 	// ----------------------------------
@@ -798,7 +796,7 @@ export const pinFields: INodeProperties[] = [
 		},
 		description: 'Optional numeric ad account ID (maximum 18 digits)',
 	},
-	
+
 	// ----------------------------------
 	//     pin:removeProductTags
 	// ----------------------------------
@@ -960,7 +958,7 @@ export const pinFields: INodeProperties[] = [
 		},
 		description: 'Optional numeric ad account ID (maximum 18 digits)',
 	},
-	
+
 	// ----------------------------------
 	//          pin:save
 	// ----------------------------------
