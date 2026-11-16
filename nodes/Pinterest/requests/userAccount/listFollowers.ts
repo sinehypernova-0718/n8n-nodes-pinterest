@@ -15,11 +15,9 @@ export async function listFollowersRequest(
 	} else {
 		const limit = this.getNodeParameter('limit', itemIndex, 50) as number;
 		if (!Number.isInteger(limit) || limit < 1 || limit > 250) {
-			throw new NodeOperationError(
-				this.getNode(),
-				'Limit must be an integer between 1 and 250',
-				{ itemIndex },
-			);
+			throw new NodeOperationError(this.getNode(), 'Limit must be an integer between 1 and 250', {
+				itemIndex,
+			});
 		}
 		qs.page_size = limit;
 	}

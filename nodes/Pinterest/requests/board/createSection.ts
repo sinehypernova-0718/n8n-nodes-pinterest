@@ -13,11 +13,9 @@ export async function createBoardSectionRequest(
 	}
 	const boardId = rawBoardId.trim();
 	if (!boardId) {
-		throw new NodeOperationError(
-			this.getNode(),
-			'Board ID is required to create a board section',
-			{ itemIndex },
-		);
+		throw new NodeOperationError(this.getNode(), 'Board ID is required to create a board section', {
+			itemIndex,
+		});
 	}
 	if (!/^\d+$/.test(boardId)) {
 		throw new NodeOperationError(this.getNode(), 'Board ID must contain only digits', {

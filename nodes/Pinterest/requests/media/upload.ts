@@ -108,9 +108,7 @@ function getVideoFileInfo(binaryData: IBinaryData): VideoFileInfo {
 	const extension = dotIndex >= 0 ? baseName.slice(dotIndex).toLowerCase() : '';
 
 	if (extension !== '' && !VIDEO_EXTENSION_TO_CONTENT_TYPE.has(extension)) {
-		throw new Error(
-			`Unsupported video file extension "${extension}". Use .mp4, .m4v, or .mov.`,
-		);
+		throw new Error(`Unsupported video file extension "${extension}". Use .mp4, .m4v, or .mov.`);
 	}
 
 	const rawMimeType = typeof binaryData.mimeType === 'string' ? binaryData.mimeType : '';
@@ -199,11 +197,7 @@ function parseRegistrationResponse(
 				{ itemIndex },
 			);
 		}
-		if (
-			typeof value !== 'string' &&
-			typeof value !== 'number' &&
-			typeof value !== 'boolean'
-		) {
+		if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') {
 			throw new NodeOperationError(
 				node,
 				`Pinterest returned an invalid value for the media upload parameter "${name}"`,
@@ -372,11 +366,9 @@ async function fetchMediaStatus(
 function readPollingOptions(this: IExecuteFunctions, itemIndex: number): PollingOptions {
 	const waitForProcessing = this.getNodeParameter('waitForProcessing', itemIndex, true);
 	if (typeof waitForProcessing !== 'boolean') {
-		throw new NodeOperationError(
-			this.getNode(),
-			'Wait for Processing must be a boolean',
-			{ itemIndex },
-		);
+		throw new NodeOperationError(this.getNode(), 'Wait for Processing must be a boolean', {
+			itemIndex,
+		});
 	}
 
 	const pollIntervalMs = this.getNodeParameter('pollIntervalMs', itemIndex, 2000);
@@ -445,10 +437,7 @@ async function waitForMediaProcessing(
 		}
 
 		const remaining = pollTimeoutMs - elapsed;
-		await sleepWithAbort(
-			Math.min(pollIntervalMs, remaining),
-			this.getExecutionCancelSignal(),
-		);
+		await sleepWithAbort(Math.min(pollIntervalMs, remaining), this.getExecutionCancelSignal());
 
 		currentStatus = await fetchMediaStatus.call(this, itemIndex, mediaId);
 	}
@@ -468,11 +457,9 @@ export async function uploadMediaVideo(
 	}
 	const binaryPropertyName = rawBinaryPropertyName.trim();
 	if (binaryPropertyName === '') {
-		throw new NodeOperationError(
-			this.getNode(),
-			'Binary Property is required to upload a video',
-			{ itemIndex },
-		);
+		throw new NodeOperationError(this.getNode(), 'Binary Property is required to upload a video', {
+			itemIndex,
+		});
 	}
 
 	let binaryData: IBinaryData;

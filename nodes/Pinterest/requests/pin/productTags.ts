@@ -67,11 +67,9 @@ function readProductPinIds(
 
 	for (const pinId of productPinIds) {
 		if (!/^\d+$/.test(pinId)) {
-			throw new NodeOperationError(
-				self.getNode(),
-				'Each Product Pin ID must contain only digits',
-				{ itemIndex },
-			);
+			throw new NodeOperationError(self.getNode(), 'Each Product Pin ID must contain only digits', {
+				itemIndex,
+			});
 		}
 	}
 

@@ -1,9 +1,4 @@
-import type {
-	Icon,
-	ICredentialTestRequest,
-	ICredentialType,
-	INodeProperties,
-} from 'n8n-workflow';
+import type { Icon, ICredentialTestRequest, ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class PinterestOAuth2Api implements ICredentialType {
 	name = 'pinterestOAuth2Api';
@@ -12,9 +7,13 @@ export class PinterestOAuth2Api implements ICredentialType {
 
 	displayName = 'Pinterest OAuth2 API';
 
-	icon: Icon = { light: 'file:../nodes/Pinterest/pinterest.svg', dark: 'file:../nodes/Pinterest/pinterest.dark.svg' };
+	icon: Icon = {
+		light: 'file:../nodes/Pinterest/pinterest.svg',
+		dark: 'file:../nodes/Pinterest/pinterest.dark.svg',
+	};
 
-	documentationUrl = 'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/';
+	documentationUrl =
+		'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/';
 
 	properties: INodeProperties[] = [
 		{
@@ -41,7 +40,8 @@ export class PinterestOAuth2Api implements ICredentialType {
 			displayName: 'Scope',
 			name: 'scope',
 			type: 'hidden',
-			default: 'ads:read,user_accounts:read,user_accounts:write,boards:read,boards:write,pins:read,pins:write',
+			default:
+				'ads:read,user_accounts:read,user_accounts:write,boards:read,boards:write,pins:read,pins:write',
 		},
 		{
 			displayName: 'Auth URI Query Parameters',
