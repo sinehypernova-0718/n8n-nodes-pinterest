@@ -12,6 +12,7 @@ import {
 	boardFields,
 	entityHistoryFields,
 	mediaFields,
+	mediaLibraryFields,
 	pinFields,
 	userAccountFields,
 } from './descriptions';
@@ -26,6 +27,12 @@ import {
 	deletePinRequest,
 	getBoardRequest,
 	getMediaRequest,
+	createMediaLibraryAssetsRequest,
+	deleteMediaLibraryAssetsRequest,
+	getMediaLibraryAssetRequest,
+	listMediaLibraryAssetsRequest,
+	normalizeMediaLibraryAssetDeletion,
+	updateMediaLibraryAssetsRequest,
 	getMultiplePinsRequest,
 	getPinAnalyticsRequest,
 	getPinRequest,
@@ -185,6 +192,53 @@ async function collectMediaListPages(
 		};
 	}
 
+	return returnAll ? collected : collected.slice(0, limit);
+}
+
+async function collectMediaLibraryAssetPages(
+	this: IExecuteFunctions,
+	firstPageRequest: IHttpRequestOptions,
+	itemIndex: number,
+): Promise<IDataObject[]> {
+	const returnAll = this.getNodeParameter('returnAll', itemIndex, false) as boolean;
+	const limit = returnAll
+		? Number.POSITIVE_INFINITY
+		: (this.getNodeParameter('limit', itemIndex, 50) as number);
+	const collected: IDataObject[] = [];
+	const seenTokens = new Set<string>();
+	const initialToken = firstPageRequest.qs?.pagination_token;
+	if (typeof initialToken === 'string' && initialToken !== '') seenTokens.add(initialToken);
+	let requestOptions: IHttpRequestOptions = {
+		baseURL: PINTEREST_API_BASE_URL,
+		json: true,
+		...firstPageRequest,
+	};
+	while (true) {
+		let response: IDataObject;
+		try {
+			response = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'pinterestOAuth2Api',
+				requestOptions,
+			)) as IDataObject;
+		} catch (error) {
+			throw mapPinterestApiError(error, { itemIndex });
+		}
+		if (!Array.isArray(response?.assets)) {
+			throw new NodeOperationError(
+				this.getNode(),
+				'Pinterest returned an invalid media library asset list response',
+				{ itemIndex },
+			);
+		}
+		collected.push(...(response.assets as IDataObject[]));
+		if (collected.length >= limit) break;
+		const token = response?.pagination_token;
+		if (typeof token !== 'string' || token === '' || seenTokens.has(token)) break;
+		seenTokens.add(token);
+		const nextPageRequest = await listMediaLibraryAssetsRequest.call(this, itemIndex, token);
+		requestOptions = { baseURL: PINTEREST_API_BASE_URL, json: true, ...nextPageRequest };
+	}
 	return returnAll ? collected : collected.slice(0, limit);
 }
 
@@ -835,6 +889,10 @@ export class Pinterest implements INodeType {
 						value: 'media',
 					},
 					{
+						name: 'Media Library',
+						value: 'mediaLibrary',
+					},
+					{
 						name: 'Pin',
 						value: 'pin',
 					},
@@ -848,6 +906,7 @@ export class Pinterest implements INodeType {
 			...pinFields,
 			...boardFields,
 			...mediaFields,
+			...mediaLibraryFields,
 			...userAccountFields,
 			...entityHistoryFields,
 		],
@@ -970,6 +1029,31 @@ export class Pinterest implements INodeType {
 								);
 						}
 						break;
+					case 'mediaLibrary':
+						switch (operation) {
+							case 'list':
+								requestOptions = await listMediaLibraryAssetsRequest.call(this, i);
+								break;
+							case 'create':
+								requestOptions = await createMediaLibraryAssetsRequest.call(this, i);
+								break;
+							case 'update':
+								requestOptions = await updateMediaLibraryAssetsRequest.call(this, i);
+								break;
+							case 'delete':
+								requestOptions = await deleteMediaLibraryAssetsRequest.call(this, i);
+								break;
+							case 'get':
+								requestOptions = await getMediaLibraryAssetRequest.call(this, i);
+								break;
+							default:
+								throw new NodeOperationError(
+									this.getNode(),
+									`The Media Library operation "${operation}" is not implemented yet`,
+									{ itemIndex: i },
+								);
+						}
+						break;
 					case 'userAccount':
 						switch (operation) {
 							case 'get':
@@ -1062,6 +1146,8 @@ export class Pinterest implements INodeType {
 						responseData = await collectBoardSectionPinsListPages.call(this, requestOptions, i);
 					} else if (resource === 'media' && operation === 'list') {
 						responseData = await collectMediaListPages.call(this, requestOptions, i);
+					} else if (resource === 'mediaLibrary' && operation === 'list') {
+						responseData = await collectMediaLibraryAssetPages.call(this, requestOptions, i);
 					} else if (resource === 'userAccount' && operation === 'listFollowers') {
 						responseData = await collectFollowersPages.call(this, requestOptions, i);
 					} else if (resource === 'userAccount' && operation === 'listFollowing') {
@@ -1122,6 +1208,10 @@ export class Pinterest implements INodeType {
 					}
 				}
 
+				if (resource === 'mediaLibrary' && operation === 'delete') {
+					responseData = normalizeMediaLibraryAssetDeletion(responseData, this.getNode(), i);
+				}
+
 				const executionData = this.helpers.constructExecutionMetaData(
 					this.helpers.returnJsonArray(responseData ?? {}),
 					{ itemData: { item: i } },
@@ -1145,7 +1235,6 @@ export class Pinterest implements INodeType {
 				throw new NodeOperationError(this.getNode(), error as Error, { itemIndex: i });
 			}
 		}
-
 		return [returnData];
 	}
 }

@@ -1,11 +1,18 @@
 import type { IDataObject, INode } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-const MEDIA_STATUS_VALUES = new Set(['registered', 'processing', 'succeeded', 'failed']);
+const MEDIA_STATUS_VALUES = new Set([
+	'registered',
+	'processing',
+	'processed',
+	'succeeded',
+	'failed',
+]);
 
 export interface NormalizeMediaOptions {
 	requireStatus?: boolean;
 	requireVideoType?: boolean;
+	expectedMediaType?: string;
 }
 
 function isDataObject(value: unknown): value is IDataObject {
@@ -52,6 +59,13 @@ export function normalizeMediaUpload(
 		throw new NodeOperationError(
 			node,
 			`Pinterest returned an unexpected media type "${mediaType}" for a video upload`,
+			{ itemIndex },
+		);
+	}
+	if (options.expectedMediaType !== undefined && mediaType !== options.expectedMediaType) {
+		throw new NodeOperationError(
+			node,
+			`Pinterest returned an unexpected media type "${mediaType}" for the requested upload`,
 			{ itemIndex },
 		);
 	}

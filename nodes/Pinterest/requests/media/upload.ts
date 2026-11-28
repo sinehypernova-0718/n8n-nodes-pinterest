@@ -12,7 +12,7 @@ import { buildMultipartBody } from './multipart';
 import { normalizeMediaUpload } from './normalize';
 import { validatePinterestUploadUrl } from './validateUploadUrl';
 
-const MAX_VIDEO_UPLOAD_BYTES = 512 * 1024 * 1024;
+const MAX_MEDIA_UPLOAD_BYTES = 512 * 1024 * 1024;
 const UPLOAD_TIMEOUT_MIN_MS = 60_000;
 const UPLOAD_TIMEOUT_PER_MB_MS = 1_000;
 const UPLOAD_TIMEOUT_MAX_MS = 600_000;
@@ -30,16 +30,29 @@ const VIDEO_CONTENT_TYPE_TO_EXTENSION = new Map<string, string>(
 	]),
 );
 
+const IMAGE_EXTENSION_TO_CONTENT_TYPE = new Map<string, string>([
+	['.jpg', 'image/jpeg'],
+	['.jpeg', 'image/jpeg'],
+	['.png', 'image/png'],
+]);
+
+const IMAGE_CONTENT_TYPE_TO_EXTENSION = new Map<string, string>([
+	['image/jpeg', '.jpg'],
+	['image/png', '.png'],
+]);
+
 interface MediaRegistration {
 	mediaId: string;
 	uploadUrl: string;
 	uploadParameters: IDataObject;
 }
 
-interface VideoFileInfo {
+interface MediaFileInfo {
 	fileName: string;
 	contentType: string;
 }
+
+type UploadMediaType = 'video' | 'media_library_video' | 'media_library_image';
 
 interface PollingOptions {
 	waitForProcessing: boolean;
@@ -93,48 +106,60 @@ function getDeclaredBinarySize(binaryData: IBinaryData): number | undefined {
 	return undefined;
 }
 
-function extensionForContentType(contentType: string): string {
-	const extension = VIDEO_CONTENT_TYPE_TO_EXTENSION.get(contentType);
+function extensionForContentType(contentType: string, image: boolean): string {
+	const extension = (image ? IMAGE_CONTENT_TYPE_TO_EXTENSION : VIDEO_CONTENT_TYPE_TO_EXTENSION).get(
+		contentType,
+	);
 	if (extension === undefined) {
-		throw new Error(`Unsupported video content type "${contentType}"`);
+		throw new Error(`Unsupported media content type "${contentType}"`);
 	}
 	return extension;
 }
 
-function getVideoFileInfo(binaryData: IBinaryData): VideoFileInfo {
+function getMediaFileInfo(binaryData: IBinaryData, mediaType: UploadMediaType): MediaFileInfo {
+	const image = mediaType === 'media_library_image';
+	const extensionMap = image ? IMAGE_EXTENSION_TO_CONTENT_TYPE : VIDEO_EXTENSION_TO_CONTENT_TYPE;
+	const mimeTypeMap = image ? IMAGE_CONTENT_TYPE_TO_EXTENSION : VIDEO_CONTENT_TYPE_TO_EXTENSION;
+	const allowedExtensions = image ? '.jpg, .jpeg, or .png' : '.mp4, .m4v, or .mov';
 	const rawFileName = typeof binaryData.fileName === 'string' ? binaryData.fileName : '';
 	const baseName = rawFileName.split(/[\\/]/).pop()?.trim() ?? '';
 	const dotIndex = baseName.lastIndexOf('.');
 	const extension = dotIndex >= 0 ? baseName.slice(dotIndex).toLowerCase() : '';
 
-	if (extension !== '' && !VIDEO_EXTENSION_TO_CONTENT_TYPE.has(extension)) {
-		throw new Error(`Unsupported video file extension "${extension}". Use .mp4, .m4v, or .mov.`);
+	if (extension !== '' && !extensionMap.has(extension)) {
+		throw new Error(`Unsupported media file extension "${extension}". Use ${allowedExtensions}.`);
 	}
 
 	const rawMimeType = typeof binaryData.mimeType === 'string' ? binaryData.mimeType : '';
 	const mimeType = rawMimeType.split(';')[0].trim().toLowerCase();
 
-	let contentType = extension !== '' ? VIDEO_EXTENSION_TO_CONTENT_TYPE.get(extension) : undefined;
-	if (contentType === undefined && mimeType.startsWith('video/')) {
-		if (!VIDEO_CONTENT_TYPE_TO_EXTENSION.has(mimeType)) {
-			throw new Error(`Unsupported video content type "${mimeType}". Use MP4, M4V, or MOV.`);
+	let contentType = extension !== '' ? extensionMap.get(extension) : undefined;
+	if (
+		contentType === undefined &&
+		(image ? mimeType.startsWith('image/') : mimeType.startsWith('video/'))
+	) {
+		if (!mimeTypeMap.has(mimeType)) {
+			throw new Error(`Unsupported media content type "${mimeType}". Use ${allowedExtensions}.`);
 		}
 		contentType = mimeType;
 	}
 	if (contentType === undefined) {
+		if (image) {
+			throw new Error(`Could not identify an image file type. Use ${allowedExtensions}.`);
+		}
 		contentType = 'video/mp4';
 	}
 
 	let fileName = baseName;
 	if (fileName === '' || fileName === extension) {
-		fileName = `video${extension !== '' ? extension : extensionForContentType(contentType)}`;
+		fileName = `${image ? 'image' : 'video'}${extension !== '' ? extension : extensionForContentType(contentType, image)}`;
 	} else if (extension === '') {
-		fileName = `${fileName}${extensionForContentType(contentType)}`;
+		fileName = `${fileName}${extensionForContentType(contentType, image)}`;
 	}
 
 	fileName = fileName.replace(/[\r\n\0]/g, '').trim();
 	if (fileName === '') {
-		fileName = `video${extensionForContentType(contentType)}`;
+		fileName = `${image ? 'image' : 'video'}${extensionForContentType(contentType, image)}`;
 	}
 
 	return { fileName, contentType };
@@ -144,6 +169,7 @@ function parseRegistrationResponse(
 	response: unknown,
 	node: INode,
 	itemIndex: number,
+	expectedMediaType: UploadMediaType,
 ): MediaRegistration {
 	if (!isDataObject(response)) {
 		throw new NodeOperationError(
@@ -162,10 +188,10 @@ function parseRegistrationResponse(
 		);
 	}
 
-	if (response.media_type !== 'video') {
+	if (response.media_type !== expectedMediaType) {
 		throw new NodeOperationError(
 			node,
-			'Pinterest returned an unexpected media type for a video upload',
+			'Pinterest returned an unexpected media type for this upload',
 			{ itemIndex },
 		);
 	}
@@ -225,13 +251,14 @@ function parseRegistrationResponse(
 async function registerMediaUpload(
 	this: IExecuteFunctions,
 	itemIndex: number,
+	mediaType: UploadMediaType,
 ): Promise<MediaRegistration> {
 	const options: IHttpRequestOptions = {
 		baseURL: PINTEREST_API_BASE_URL,
 		url: '/media',
 		method: 'POST',
 		json: true,
-		body: { media_type: 'video' },
+		body: { media_type: mediaType },
 		abortSignal: this.getExecutionCancelSignal(),
 	};
 
@@ -246,14 +273,14 @@ async function registerMediaUpload(
 		throw mapPinterestApiError(error, { itemIndex });
 	}
 
-	return parseRegistrationResponse(response, this.getNode(), itemIndex);
+	return parseRegistrationResponse(response, this.getNode(), itemIndex, mediaType);
 }
 
 async function uploadToMediaStorage(
 	this: IExecuteFunctions,
 	itemIndex: number,
 	registration: MediaRegistration,
-	file: VideoFileInfo & { data: Buffer },
+	file: MediaFileInfo & { data: Buffer },
 ): Promise<void> {
 	let validatedUrl: ReturnType<typeof validatePinterestUploadUrl>;
 	try {
@@ -302,9 +329,9 @@ async function uploadToMediaStorage(
 	} catch (error) {
 		throw new NodeOperationError(
 			this.getNode(),
-			`Failed to upload the video file to Pinterest media storage${describeUploadFailure(
+			`Failed to upload the media file to Pinterest media storage${describeUploadFailure(
 				error,
-			)}. Verify that the file is a supported video and try again.`,
+			)}. Verify that the file type matches the selected Media Type and try again.`,
 			{ itemIndex },
 		);
 	}
@@ -317,7 +344,7 @@ async function uploadToMediaStorage(
 	) {
 		throw new NodeOperationError(
 			this.getNode(),
-			'Pinterest media storage did not confirm the video upload',
+			'Pinterest media storage did not confirm the media upload',
 			{ itemIndex },
 		);
 	}
@@ -327,6 +354,7 @@ async function fetchMediaStatus(
 	this: IExecuteFunctions,
 	itemIndex: number,
 	mediaId: string,
+	mediaType: UploadMediaType,
 ): Promise<IDataObject> {
 	const options: IHttpRequestOptions = {
 		baseURL: PINTEREST_API_BASE_URL,
@@ -349,7 +377,7 @@ async function fetchMediaStatus(
 
 	const normalized = normalizeMediaUpload(response, this.getNode(), itemIndex, {
 		requireStatus: true,
-		requireVideoType: true,
+		expectedMediaType: mediaType,
 	});
 
 	if (normalized.media_id !== mediaId) {
@@ -406,6 +434,7 @@ async function waitForMediaProcessing(
 	this: IExecuteFunctions,
 	itemIndex: number,
 	mediaId: string,
+	mediaType: UploadMediaType,
 	initialStatus: IDataObject,
 	pollIntervalMs: number,
 	pollTimeoutMs: number,
@@ -420,7 +449,7 @@ async function waitForMediaProcessing(
 		if (currentStatus.status === 'failed') {
 			throw new NodeOperationError(
 				this.getNode(),
-				`Pinterest failed to process the uploaded video (media ID ${mediaId})`,
+				`Pinterest failed to process the uploaded media (media ID ${mediaId})`,
 				{ itemIndex },
 			);
 		}
@@ -429,7 +458,7 @@ async function waitForMediaProcessing(
 		if (elapsed >= pollTimeoutMs) {
 			throw new NodeOperationError(
 				this.getNode(),
-				`Timed out waiting for Pinterest to process the uploaded video (media ID ${mediaId}, last status "${String(
+				`Timed out waiting for Pinterest to process the uploaded media (media ID ${mediaId}, last status "${String(
 					currentStatus.status,
 				)}"). Use the Get Upload operation to check the status later.`,
 				{ itemIndex },
@@ -439,7 +468,7 @@ async function waitForMediaProcessing(
 		const remaining = pollTimeoutMs - elapsed;
 		await sleepWithAbort(Math.min(pollIntervalMs, remaining), this.getExecutionCancelSignal());
 
-		currentStatus = await fetchMediaStatus.call(this, itemIndex, mediaId);
+		currentStatus = await fetchMediaStatus.call(this, itemIndex, mediaId, mediaType);
 	}
 }
 
@@ -448,6 +477,11 @@ export async function uploadMediaVideo(
 	itemIndex: number,
 ): Promise<IDataObject> {
 	const node = this.getNode();
+	const mediaType = this.getNodeParameter('mediaType', itemIndex, 'video');
+	if (!['video', 'media_library_video', 'media_library_image'].includes(mediaType as string)) {
+		throw new NodeOperationError(node, 'Media Type is not supported', { itemIndex });
+	}
+	const uploadMediaType = mediaType as UploadMediaType;
 
 	const rawBinaryPropertyName = this.getNodeParameter('binaryPropertyName', itemIndex, 'data');
 	if (typeof rawBinaryPropertyName !== 'string') {
@@ -457,7 +491,7 @@ export async function uploadMediaVideo(
 	}
 	const binaryPropertyName = rawBinaryPropertyName.trim();
 	if (binaryPropertyName === '') {
-		throw new NodeOperationError(this.getNode(), 'Binary Property is required to upload a video', {
+		throw new NodeOperationError(this.getNode(), 'Binary Property is required to upload media', {
 			itemIndex,
 		});
 	}
@@ -468,7 +502,7 @@ export async function uploadMediaVideo(
 	} catch (error) {
 		throw new NodeOperationError(
 			this.getNode(),
-			`Could not read the video file from binary property "${binaryPropertyName}": ${
+			`Could not read the media file from binary property "${binaryPropertyName}": ${
 				(error as Error).message
 			}`,
 			{ itemIndex },
@@ -476,11 +510,11 @@ export async function uploadMediaVideo(
 	}
 
 	const declaredSize = getDeclaredBinarySize(binaryData);
-	if (declaredSize !== undefined && declaredSize > MAX_VIDEO_UPLOAD_BYTES) {
+	if (declaredSize !== undefined && declaredSize > MAX_MEDIA_UPLOAD_BYTES) {
 		throw new NodeOperationError(
 			this.getNode(),
-			`The video file exceeds the ${Math.floor(
-				MAX_VIDEO_UPLOAD_BYTES / (1024 * 1024),
+			`The media file exceeds the ${Math.floor(
+				MAX_MEDIA_UPLOAD_BYTES / (1024 * 1024),
 			)} MB limit supported by this node`,
 			{ itemIndex },
 		);
@@ -492,7 +526,7 @@ export async function uploadMediaVideo(
 	} catch (error) {
 		throw new NodeOperationError(
 			this.getNode(),
-			`Could not read the video file from binary property "${binaryPropertyName}": ${
+			`Could not read the media file from binary property "${binaryPropertyName}": ${
 				(error as Error).message
 			}`,
 			{ itemIndex },
@@ -500,40 +534,45 @@ export async function uploadMediaVideo(
 	}
 
 	if (buffer.length === 0) {
-		throw new NodeOperationError(this.getNode(), 'The video file is empty', { itemIndex });
+		throw new NodeOperationError(this.getNode(), 'The media file is empty', { itemIndex });
 	}
-	if (buffer.length > MAX_VIDEO_UPLOAD_BYTES) {
+	if (buffer.length > MAX_MEDIA_UPLOAD_BYTES) {
 		throw new NodeOperationError(
 			this.getNode(),
-			`The video file exceeds the ${Math.floor(
-				MAX_VIDEO_UPLOAD_BYTES / (1024 * 1024),
+			`The media file exceeds the ${Math.floor(
+				MAX_MEDIA_UPLOAD_BYTES / (1024 * 1024),
 			)} MB limit supported by this node`,
 			{ itemIndex },
 		);
 	}
 
-	let fileInfo: VideoFileInfo;
+	let fileInfo: MediaFileInfo;
 	try {
-		fileInfo = getVideoFileInfo(binaryData);
+		fileInfo = getMediaFileInfo(binaryData, uploadMediaType);
 	} catch (error) {
 		throw new NodeOperationError(this.getNode(), (error as Error).message, { itemIndex });
 	}
 
 	const pollingOptions = readPollingOptions.call(this, itemIndex);
-	const registration = await registerMediaUpload.call(this, itemIndex);
+	const registration = await registerMediaUpload.call(this, itemIndex, uploadMediaType);
 
 	await uploadToMediaStorage.call(this, itemIndex, registration, {
 		...fileInfo,
 		data: buffer,
 	});
 
-	const initialStatus = await fetchMediaStatus.call(this, itemIndex, registration.mediaId);
+	const initialStatus = await fetchMediaStatus.call(
+		this,
+		itemIndex,
+		registration.mediaId,
+		uploadMediaType,
+	);
 
 	if (!pollingOptions.waitForProcessing) {
 		if (initialStatus.status === 'failed') {
 			throw new NodeOperationError(
 				node,
-				`Pinterest failed to process the uploaded video (media ID ${registration.mediaId})`,
+				`Pinterest failed to process the uploaded media (media ID ${registration.mediaId})`,
 				{ itemIndex },
 			);
 		}
@@ -544,6 +583,7 @@ export async function uploadMediaVideo(
 		this,
 		itemIndex,
 		registration.mediaId,
+		uploadMediaType,
 		initialStatus,
 		pollingOptions.pollIntervalMs,
 		pollingOptions.pollTimeoutMs,
