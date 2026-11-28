@@ -24,12 +24,14 @@
 - **Pin management** — create, retrieve, list, update, delete, and save Pins, and manage product-tag associations.
 - **Board management** — create, retrieve, list, update, and delete boards and board sections, and retrieve Pins associated with boards.
 - **Pin analytics** — retrieve supported analytics metrics over specified date ranges.
-- **Media uploads** — register, transfer, and track video uploads for video Pins, with optional processing polling.
+- **Media uploads** — register, transfer, and track video Pin media and Media Library image/video uploads, with optional processing polling.
 - **User account management** — retrieve account details and analytics, manage following relationships, and claim or verify websites.
 - **Ad entity history** — inspect the change history of ad entities for an ad account.
 - **Pagination support** — retrieve paginated results where supported by the relevant operation.
 
 ## 📁 Repository Structure
+
+Media Library adds `descriptions/MediaLibraryDescriptions.ts` and the five operation builders under `requests/mediaLibrary/`.
 
 ```text
 n8n-nodes-pinterest/
@@ -85,6 +87,8 @@ n8n-nodes-pinterest/
 - **Resource `index.ts` files** — explicitly export the request builders belonging to each resource.
 - **`requests/index.ts`** — re-exports the resource-level barrels, providing a single import entry point for request modules.
 - **`Pinterest.node.ts`** — defines the n8n node and coordinates operation execution, authenticated API requests, media storage transfers, pagination, and error handling.
+
+- **Media Library** — defined in `descriptions/MediaLibraryDescriptions.ts` with the five business-scoped request builders in `requests/mediaLibrary/`.
 
 The architecture separates editor-facing configuration from API request construction and execution. Resource descriptions define the available operations and parameters, while request modules build operation-specific requests. The main node remains responsible for invoking authenticated HTTP requests through n8n's credential-aware helpers, transferring media files to the storage URL returned by Pinterest, and handling execution results.
 
@@ -151,17 +155,31 @@ Pinterest documents these `IneligibleProductTagReason` values for Add Product Ta
 
 ### Media
 
-The Media resource supports Pinterest's media upload endpoints for video Pins. Image uploads and Media Library operations are not implemented.
+The Media resource supports Pinterest media registration, upload, and status endpoints for video Pins and Media Library assets.
 
-| Operation    | Description                                                                                                |
-| ------------ | ---------------------------------------------------------------------------------------------------------- |
-| Get Upload   | Retrieve the status of a media upload by its numeric media ID.                                             |
-| List Uploads | List media uploads with bookmark pagination.                                                               |
-| Upload Video | Register a video upload, transfer the file to Pinterest media storage, and optionally wait for processing. |
+| Operation    | Description                                                                                     |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| Get Upload   | Retrieve the status of a media upload by its numeric media ID.                                  |
+| List Uploads | List media uploads with bookmark pagination.                                                    |
+| Upload Media | Register media, transfer a file to Pinterest media storage, and optionally wait for processing. |
 
-**Upload Video** reads a video from an n8n binary property and supports MP4, M4V, and MOV files up to 512 MB. The node registers the upload, sends the file directly to Pinterest's media storage, and then checks the upload status. When **Wait for Processing** is enabled, the node polls Pinterest until the video finishes processing, fails, or the configured timeout is reached. The upload URL and temporary upload credentials returned by Pinterest are never included in node output or error messages.
+**Upload Media** reads a file from an n8n binary property. Select **Video Pin** for MP4/M4V/MOV files, **Media Library Video** for MP4/M4V/MOV files, or **Media Library Image** for JPG/JPEG/PNG files. Files are capped at 512 MB. The node registers the matching Pinterest `media_type`, uploads directly to Pinterest media storage, and checks the upload status. When **Wait for Processing** is enabled, it polls until processing succeeds, fails, or the configured timeout is reached. The upload URL and temporary upload credentials are never included in node output or error messages.
 
-Uploading a video does not create a Pin by itself. Use the returned `media_id` with the Pin resource to create a video Pin. Media uploads use the existing `pins:read` and `pins:write` scopes; no additional credential scopes are required.
+Uploading a video does not create a Pin by itself. Use its returned `media_id` with the Pin resource to create a video Pin. Register **Media Library Video** or **Media Library Image** media to create a Media Library asset instead.
+
+### Media Library
+
+The Media Library resource manages reusable business-owned advertising creatives. Assets are not Pins. Create assets from media that has been registered, uploaded, and processed using **Upload Media** with **Media Library Video** or **Media Library Image** selected. The resulting `media_id` is accepted by **Create Asset(s)**.
+
+| Operation       | Description                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Get All Assets  | List assets with filters and pagination.                                                                                       |
+| Create Asset(s) | Create 1–100 assets from uploaded media using a JSON array of `{ "media_id", "name", "tags"? }` objects.                       |
+| Edit Asset(s)   | Rename or retag 1–100 assets using a JSON array of `{ "asset_id", "name"?, "tags"? }` objects. Use `"tags": []` to clear tags. |
+| Remove Asset(s) | Delete 1–100 assets by their comma-separated numeric IDs.                                                                      |
+| Get an Asset    | Retrieve one asset by business ID and asset ID.                                                                                |
+
+Get All Assets supports Pinterest's name, ID, type, promotion, creation-date, tag, and sort filters. Names, IDs, and tags accept comma-separated values, so filter values containing commas cannot be represented. Pagination follows Pinterest's `pagination_token` automatically; the final token is not exposed for manual paging. Create and edit accept JSON arrays or expressions that evaluate to arrays. Bulk responses can report partial failures with HTTP 200; inspect `status`, counts, and per-asset results. These endpoints require `ads:read` for reads and `ads:write` for create, edit, and remove; they are not available in Pinterest's API Sandbox.
 
 ### User Account
 
@@ -235,16 +253,16 @@ Pinterest controls application access and approval. Registering a developer appl
 
 Create a Pinterest OAuth2 API credential in n8n and supply the values required by the credential configuration.
 
-| Setting           | Value                                                                                                 |
-| ----------------- | ----------------------------------------------------------------------------------------------------- |
-| Grant type        | Authorization Code                                                                                    |
-| Authorization URL | `https://www.pinterest.com/oauth/`                                                                    |
-| Access token URL  | `https://api.pinterest.com/v5/oauth/token`                                                            |
-| Client ID         | The client ID issued for your Pinterest application                                                   |
-| Client secret     | The client secret issued for your Pinterest application                                               |
-| Scopes            | `user_accounts:read`, `user_accounts:write`, `boards:read`, `boards:write`, `pins:read`, `pins:write` |
+| Setting           | Value                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Grant type        | Authorization Code                                                                                                             |
+| Authorization URL | `https://www.pinterest.com/oauth/`                                                                                             |
+| Access token URL  | `https://api.pinterest.com/v5/oauth/token`                                                                                     |
+| Client ID         | The client ID issued for your Pinterest application                                                                            |
+| Client secret     | The client secret issued for your Pinterest application                                                                        |
+| Scopes            | `ads:read`, `ads:write`, `user_accounts:read`, `user_accounts:write`, `boards:read`, `boards:write`, `pins:read`, `pins:write` |
 
-The Entity History resource is the only operation that needs the `ads:read` scope, which the credential requests by default. Make sure the scope is also granted to your Pinterest application before using it.
+Entity History and Media Library reads use `ads:read`; Media Library writes use `ads:write`. Both scopes are requested by default. Existing OAuth connections must be re-authorized to grant the newly requested `ads:write` scope before using Media Library write operations. Make sure the scopes are also granted to your Pinterest application.
 
 Configure the OAuth redirect URL using the callback URL supplied by n8n. Register that URL with your Pinterest application wherever required by Pinterest's developer configuration.
 
@@ -252,7 +270,7 @@ Save the credential and use n8n's authorization flow to connect your Pinterest a
 
 ### Permissions and access
 
-The configured scopes cover the board, Pin, media upload, product-tag, and user account operations used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint and the read operations of the User Account resource, while `user_accounts:write` covers the write operations such as website verification and following a user. The Entity History operation is authorized with the `ads:read` scope explicitly. Individual operations may still require specific permissions, resource access, or additional API eligibility.
+The configured scopes cover the board, Pin, media upload, product-tag, Media Library, and user account operations used by the current implementation. The `user_accounts:read` scope supports the credential check against the `GET /v5/user_account` endpoint and the read operations of the User Account resource, while `user_accounts:write` covers the write operations such as website verification and following a user. The Media Library and Entity History operations use `ads:read`; Media Library writes also use `ads:write`. Existing OAuth connections need re-authorization after this scope was added. Individual operations may still require specific permissions, resource access, or additional API eligibility.
 
 Pin analytics availability and supported metrics are subject to Pinterest's API requirements. Application approval status, access restrictions, and Pinterest-side changes can affect whether an operation succeeds.
 

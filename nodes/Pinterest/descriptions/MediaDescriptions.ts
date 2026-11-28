@@ -25,10 +25,10 @@ export const mediaFields: INodeProperties[] = [
 				action: 'List media uploads',
 			},
 			{
-				name: 'Upload Video',
+				name: 'Upload Media',
 				value: 'upload',
-				description: 'Register, upload, and check processing of a video for a Pin',
-				action: 'Upload a video',
+				description: 'Register, upload, and check processing of video or media library assets',
+				action: 'Upload media',
 			},
 		],
 		default: 'upload',
@@ -37,6 +37,19 @@ export const mediaFields: INodeProperties[] = [
 	// ----------------------------------
 	//         media:upload
 	// ----------------------------------
+	{
+		displayName: 'Media Type',
+		name: 'mediaType',
+		type: 'options',
+		options: [
+			{ name: 'Video Pin', value: 'video' },
+			{ name: 'Media Library Video', value: 'media_library_video' },
+			{ name: 'Media Library Image', value: 'media_library_image' },
+		],
+		default: 'video',
+		displayOptions: { show: { resource: ['media'], operation: ['upload'] } },
+		description: 'Pinterest media type to register. File type must match the selection.',
+	},
 	{
 		displayName: 'Binary Property',
 		name: 'binaryPropertyName',
@@ -49,7 +62,7 @@ export const mediaFields: INodeProperties[] = [
 				operation: ['upload'],
 			},
 		},
-		description: 'Name of the binary property that contains the video file to upload',
+		description: 'Name of the binary property that contains the media file to upload',
 	},
 	{
 		displayName: 'Wait for Processing',

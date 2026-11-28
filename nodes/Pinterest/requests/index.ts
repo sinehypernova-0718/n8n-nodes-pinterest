@@ -1,5 +1,13 @@
 export { getEntityHistoryRequest } from './entityHistory';
 export {
+	createMediaLibraryAssetsRequest,
+	deleteMediaLibraryAssetsRequest,
+	getMediaLibraryAssetRequest,
+	listMediaLibraryAssetsRequest,
+	normalizeMediaLibraryAssetDeletion,
+	updateMediaLibraryAssetsRequest,
+} from './mediaLibrary';
+export {
 	getUserAccountRequest,
 	getAnalyticsRequest,
 	getTopPinsAnalyticsRequest,
