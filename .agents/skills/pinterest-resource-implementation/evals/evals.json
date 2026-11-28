@@ -1,0 +1,29 @@
+{
+	"skill_name": "pinterest-resource-implementation",
+	"evals": [
+		{
+			"id": 1,
+			"prompt": "Pinterest just added DELETE /pins/{pin_id}/comments/{comment_id}. Add a 'Delete Comment' operation to the Pin resource end to end.",
+			"expected_output": "A new operation option and required pinId/commentId fields in PinDescriptions.ts, a requests/pin/deleteComment.ts builder returning a DELETE request, exports from the pin and top-level barrels, a dispatch case in Pinterest.node.ts, and clean lint/build. No pagination helper.",
+			"files": []
+		},
+		{
+			"id": 2,
+			"prompt": "The board update operation should accept a new optional 'category' string field. Wire it through the editor and the request body.",
+			"expected_output": "A category field inside the board:update additionalFields collection and a conditional body.category assignment that omits empty values, with no changes to other operations.",
+			"files": []
+		},
+		{
+			"id": 3,
+			"prompt": "Add a new Conversion Tag resource with List and Get operations. The list endpoint returns { items, bookmark } and supports page_size up to 250.",
+			"expected_output": "A ConversionTagDescriptions.ts with resource selector wiring, two builders, barrel exports, a resource option/spread and a nested switch in execute(), returnAll/limit fields, a collectConversionTagPages helper, and clean lint/build.",
+			"files": []
+		},
+		{
+			"id": 4,
+			"prompt": "Make userAccount:listFollowers return every follower when Return All is enabled, and still respect Limit otherwise.",
+			"expected_output": "Confirmation that the existing returnAll/limit fields and collectFollowersPages helper already implement this, or a corrected helper/description pair if they do not; pagination stays bookmark-based and terminates on repeated bookmarks.",
+			"files": []
+		}
+	]
+}

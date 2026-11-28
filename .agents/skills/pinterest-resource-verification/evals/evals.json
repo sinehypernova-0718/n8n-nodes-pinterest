@@ -1,0 +1,29 @@
+{
+	"skill_name": "pinterest-resource-verification",
+	"evals": [
+		{
+			"id": 1,
+			"prompt": "Audit pin:getMultiple against the Pinterest API v5 docs. Is the endpoint, query shape and operation label correct?",
+			"expected_output": "A report that pins the docs date, compares GET /pins/analytics and its required query parameters to getMultiple.ts, checks the 'Get Multiple Pin Analytics' label against the behavior, and labels each claim VERIFIED/UNVERIFIED with exact paths.",
+			"files": []
+		},
+		{
+			"id": 2,
+			"prompt": "Review the media upload flow for security issues before we ship it.",
+			"expected_output": "A read-only audit tracing POST /media, the external storage POST and GET /media/{id}, checking URL validation, domain restriction, redirect handling, size/timeout caps and error leakage, with severity-labelled findings.",
+			"files": []
+		},
+		{
+			"id": 3,
+			"prompt": "Check that every Board operation has a description, a builder export and a dispatch case. Tell me if anything is missing.",
+			"expected_output": "A three-way reconciliation of BoardDescriptions.ts operation options, requests/board/index.ts exports and the board switch in Pinterest.node.ts, with the exact missing or extra item named, or an explicit 'no drift found' plus what was inspected.",
+			"files": []
+		},
+		{
+			"id": 4,
+			"prompt": "Is userAccount:unverifyWebsite handling the empty 204 response correctly, or will it emit a broken item?",
+			"expected_output": "A trace through the builder, execute() response handling and output construction showing responseData ?? {}, with the scope of the 204 handling verified and any risk to other operations called out.",
+			"files": []
+		}
+	]
+}
