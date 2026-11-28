@@ -21,15 +21,6 @@ export async function updateMediaLibraryAssetsRequest(
 			);
 		}
 		if (
-			(asset.name === undefined || asset.name === null) &&
-			(asset.tags === undefined || asset.tags === null)
-		) {
-			throw new NodeOperationError(this.getNode(), `Asset ${index + 1} must include name or tags`, {
-				itemIndex,
-			});
-		}
-		asset.asset_id = asset.asset_id.trim();
-		if (
 			asset.name !== undefined &&
 			asset.name !== null &&
 			(typeof asset.name !== 'string' || asset.name.trim() === '')
@@ -49,7 +40,24 @@ export async function updateMediaLibraryAssetsRequest(
 				{ itemIndex },
 			);
 		}
-		if (typeof asset.name === 'string') asset.name = asset.name.trim();
+
+		asset.asset_id = asset.asset_id.trim();
+
+		// `null` means "leave unchanged": drop the property so the PATCH body omits it.
+		if (asset.name === null) {
+			delete asset.name;
+		} else if (typeof asset.name === 'string') {
+			asset.name = asset.name.trim();
+		}
+		if (asset.tags === null) {
+			delete asset.tags;
+		}
+
+		if (asset.name === undefined && asset.tags === undefined) {
+			throw new NodeOperationError(this.getNode(), `Asset ${index + 1} must include name or tags`, {
+				itemIndex,
+			});
+		}
 	}
 	return {
 		method: 'PATCH',
